@@ -1,0 +1,10 @@
+com\tncv\user_service\entity\Diploma.class
+com\tncv\user_service\service\UserService.class
+com\tncv\user_service\config\SecurityConfig.class
+com\tncv\user_service\entity\User.class
+com\tncv\user_service\repository\UserRepository.class
+com\tncv\user_service\UserServiceApplication.class
+com\tncv\user_service\controller\UserController.class
+com\tncv\user_service\repository\DiplomaRepository.class
+com\tncv\user_service\dto\RegisterRequest.class
+com\tncv\user_service\config\KeycloakConfig.class

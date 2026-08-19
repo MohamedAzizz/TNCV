@@ -1,0 +1,38 @@
+services:
+
+  # ==========================================
+  # PostgreSQL - Database for TNCV
+  # ==========================================
+  postgres:
+    image: postgres:17
+    container_name: tncv-postgres
+    environment:
+      POSTGRES_DB: tncv
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 14373675
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+
+  # ==========================================
+  # Keycloak
+  # ==========================================
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: tncv-keycloak
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8181:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
