@@ -7,20 +7,61 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_profiles")
+@Table(
+        name = "user_profiles",
+        uniqueConstraints = {
+
+                @UniqueConstraint(
+                        name = "uk_user_keycloak_id",
+                        columnNames = "keycloak_user_id"
+                ),
+
+                @UniqueConstraint(
+                        name = "uk_user_username",
+                        columnNames = "username"
+                ),
+
+                @UniqueConstraint(
+                        name = "uk_user_email",
+                        columnNames = "email"
+                )
+        }
+)
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "keycloak_user_id", unique = true)
+    // ============================================================
+    // KEYCLOAK ID
+    // ============================================================
+
+    @Column(
+            name = "keycloak_user_id",
+            nullable = false,
+            unique = true
+    )
     private String keycloakUserId;
+
+    // ============================================================
+    // USERNAME
+    // ============================================================
+
+    @Column(
+            nullable = false,
+            unique = true
+    )
+    private String username;
+
+    // ============================================================
+    // PERSONAL INFORMATION
+    // ============================================================
 
     @Column(nullable = false)
     private String firstName;
@@ -31,30 +72,46 @@ public class UserProfile {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column
     private String phone;
 
-    @Column
     private String profileImage;
 
-    @Column
     private String profession;
 
-    @Column(nullable = false, updatable = false)
+    // ============================================================
+    // DATES
+    // ============================================================
+
+    @Column(
+            nullable = false,
+            updatable = false
+    )
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    // ============================================================
+    // CREATE
+    // ============================================================
 
     @PrePersist
     protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime now =
+                LocalDateTime.now();
+
         createdAt = now;
         updatedAt = now;
     }
 
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+
+        updatedAt =
+                LocalDateTime.now();
     }
 }

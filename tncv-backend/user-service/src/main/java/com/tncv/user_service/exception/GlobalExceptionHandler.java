@@ -1,45 +1,29 @@
 package com.tncv.user_service.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(
-            ResourceNotFoundException exception) {
-
-        return buildResponse(
-                HttpStatus.NOT_FOUND,
-                exception.getMessage()
-        );
-    }
-
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicate(
-            DuplicateResourceException exception) {
-
-        return buildResponse(
-                HttpStatus.CONFLICT,
-                exception.getMessage()
-        );
-    }
+    // ============================================================
+    // VALIDATION
+    // ============================================================
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(
+    public ResponseEntity<Map<String, String>>
+    handleValidation(
             MethodArgumentNotValidException exception) {
 
-        Map<String, Object> response = new HashMap<>();
-
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errors =
+                new HashMap<>();
 
         exception.getBindingResult()
                 .getFieldErrors()
@@ -50,27 +34,58 @@ public class GlobalExceptionHandler {
                         )
                 );
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 400);
-        response.put("errors", errors);
-
         return ResponseEntity
                 .badRequest()
+                .body(errors);
+    }
+
+    // ============================================================
+    // DATABASE
+    // ============================================================
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>>
+    handleDatabaseError(
+            DataIntegrityViolationException exception) {
+
+        Map<String, String> response =
+                new HashMap<>();
+
+        response.put(
+                "message",
+                "Erreur de contrainte PostgreSQL"
+        );
+
+        response.put(
+                "details",
+                exception.getMostSpecificCause()
+                        .getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(response);
     }
 
-    private ResponseEntity<Map<String, Object>> buildResponse(
-            HttpStatus status,
-            String message) {
+    // ============================================================
+    // RUNTIME
+    // ============================================================
 
-        Map<String, Object> response = new HashMap<>();
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>>
+    handleRuntimeException(
+            RuntimeException exception) {
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", status.value());
-        response.put("message", message);
+        Map<String, String> response =
+                new HashMap<>();
+
+        response.put(
+                "message",
+                exception.getMessage()
+        );
 
         return ResponseEntity
-                .status(status)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 }

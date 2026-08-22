@@ -16,84 +16,173 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserResponse createUser(UserRequest request) {
+    // ============================================================
+    // GET CURRENT USER
+    // ============================================================
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Un utilisateur avec cet email existe déjà");
-        }
+    public UserResponse getUserByKeycloakUserId(
+            String keycloakUserId) {
 
-        UserProfile user = UserProfile.builder()
-                .keycloakUserId(request.getKeycloakUserId())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .profileImage(request.getProfileImage())
-                .profession(request.getProfession())
-                .build();
-
-        UserProfile savedUser = userRepository.save(user);
-
-        return mapToResponse(savedUser);
-    }
-
-    public UserResponse getUserById(UUID id) {
-
-        UserProfile user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Utilisateur introuvable"));
+        UserProfile user =
+                userRepository
+                        .findByKeycloakUserId(
+                                keycloakUserId
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Profil utilisateur introuvable"
+                                )
+                        );
 
         return mapToResponse(user);
     }
 
+    // ============================================================
+    // GET USER BY ID
+    // ============================================================
+
+    public UserResponse getUserById(
+            UUID id) {
+
+        UserProfile user =
+                userRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Utilisateur introuvable"
+                                )
+                        );
+
+        return mapToResponse(user);
+    }
+
+    // ============================================================
+    // GET ALL USERS
+    // ============================================================
+
     public List<UserResponse> getAllUsers() {
 
-        return userRepository.findAll()
+        return userRepository
+                .findAll()
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
-    public UserResponse updateUser(UUID id, UserRequest request) {
+    // ============================================================
+    // UPDATE CURRENT USER
+    // ============================================================
 
-        UserProfile user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Utilisateur introuvable"));
+    public UserResponse updateCurrentUser(
+            String keycloakUserId,
+            UserRequest request) {
 
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPhone(request.getPhone());
-        user.setProfileImage(request.getProfileImage());
-        user.setProfession(request.getProfession());
+        UserProfile user =
+                userRepository
+                        .findByKeycloakUserId(
+                                keycloakUserId
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Profil utilisateur introuvable"
+                                )
+                        );
 
-        UserProfile updatedUser = userRepository.save(user);
+        user.setFirstName(
+                request.getFirstName()
+        );
+
+        user.setLastName(
+                request.getLastName()
+        );
+
+        user.setPhone(
+                request.getPhone()
+        );
+
+        user.setProfileImage(
+                request.getProfileImage()
+        );
+
+        user.setProfession(
+                request.getProfession()
+        );
+
+        UserProfile updatedUser =
+                userRepository.save(user);
 
         return mapToResponse(updatedUser);
     }
 
+    // ============================================================
+    // DELETE USER
+    // ============================================================
+
     public void deleteUser(UUID id) {
 
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Utilisateur introuvable");
-        }
+        UserProfile user =
+                userRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Utilisateur introuvable"
+                                )
+                        );
 
-        userRepository.deleteById(id);
+        userRepository.delete(user);
     }
 
-    private UserResponse mapToResponse(UserProfile user) {
+    // ============================================================
+    // MAPPING
+    // ============================================================
+
+    private UserResponse mapToResponse(
+            UserProfile user) {
 
         return UserResponse.builder()
+
                 .id(user.getId())
-                .keycloakUserId(user.getKeycloakUserId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .profileImage(user.getProfileImage())
-                .profession(user.getProfession())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
+
+                .keycloakUserId(
+                        user.getKeycloakUserId()
+                )
+
+                .username(
+                        user.getUsername()
+                )
+
+                .firstName(
+                        user.getFirstName()
+                )
+
+                .lastName(
+                        user.getLastName()
+                )
+
+                .email(
+                        user.getEmail()
+                )
+
+                .phone(
+                        user.getPhone()
+                )
+
+                .profileImage(
+                        user.getProfileImage()
+                )
+
+                .profession(
+                        user.getProfession()
+                )
+
+                .createdAt(
+                        user.getCreatedAt()
+                )
+
+                .updatedAt(
+                        user.getUpdatedAt()
+                )
+
                 .build();
     }
 }

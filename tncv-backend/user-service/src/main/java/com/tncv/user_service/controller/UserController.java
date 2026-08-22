@@ -5,8 +5,8 @@ import com.tncv.user_service.dto.UserResponse;
 import com.tncv.user_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,14 +19,47 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<UserResponse> createUser(
+    // ============================================================
+    // CURRENT USER
+    // ============================================================
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            Authentication authentication) {
+
+        String keycloakUserId =
+                authentication.getName();
+
+        return ResponseEntity.ok(
+                userService.getUserByKeycloakUserId(
+                        keycloakUserId
+                )
+        );
+    }
+
+    // ============================================================
+    // UPDATE CURRENT USER
+    // ============================================================
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(
+            Authentication authentication,
             @Valid @RequestBody UserRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userService.createUser(request));
+        String keycloakUserId =
+                authentication.getName();
+
+        return ResponseEntity.ok(
+                userService.updateCurrentUser(
+                        keycloakUserId,
+                        request
+                )
+        );
     }
+
+    // ============================================================
+    // ADMIN - GET USER
+    // ============================================================
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(
@@ -37,6 +70,10 @@ public class UserController {
         );
     }
 
+    // ============================================================
+    // ADMIN - GET ALL USERS
+    // ============================================================
+
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
 
@@ -45,15 +82,9 @@ public class UserController {
         );
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable UUID id,
-            @Valid @RequestBody UserRequest request) {
-
-        return ResponseEntity.ok(
-                userService.updateUser(id, request)
-        );
-    }
+    // ============================================================
+    // ADMIN - DELETE USER
+    // ============================================================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
