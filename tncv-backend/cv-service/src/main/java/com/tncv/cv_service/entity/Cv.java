@@ -2,6 +2,9 @@ package com.tncv.cv_service.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "cvs")
 public class Cv {
@@ -31,31 +34,41 @@ public class Cv {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
+    // ============================================================
+    // RELATIONS
+    // ============================================================
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Experience> experiences = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> educations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> skills = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Language> languages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Project> projects = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certification> certifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Interest> interests = new ArrayList<>();
+
+    // ============================================================
+    // CONSTRUCTORS
+    // ============================================================
+
     public Cv() {
     }
 
-    public Cv(
-            Long id,
-            String userId,
-            String title,
-            String fullName,
-            String email,
-            String phone,
-            String address,
-            String linkedin,
-            String github,
-            String summary) {
-        this.id = id;
-        this.userId = userId;
-        this.title = title;
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.address = address;
-        this.linkedin = linkedin;
-        this.github = github;
-        this.summary = summary;
-    }
+    // ============================================================
+    // GETTERS / SETTERS
+    // ============================================================
 
     public Long getId() {
         return id;
@@ -135,5 +148,61 @@ public class Cv {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public List<Experience> getExperiences() {
+        return experiences;
+    }
+
+    public void setExperiences(List<Experience> experiences) {
+        this.experiences = experiences;
+    }
+
+    public List<Education> getEducations() {
+        return educations;
+    }
+
+    public void setEducations(List<Education> educations) {
+        this.educations = educations;
+    }
+
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
+
+    public List<Language> getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(List<Language> languages) {
+        this.languages = languages;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
+    public List<Certification> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<Certification> certifications) {
+        this.certifications = certifications;
+    }
+
+    public List<Interest> getInterests() {
+        return interests;
+    }
+
+    public void setInterests(List<Interest> interests) {
+        this.interests = interests;
     }
 }
