@@ -3,6 +3,7 @@ package com.tncv.cv_service.service;
 import com.tncv.cv_service.dto.CvRequest;
 import com.tncv.cv_service.dto.CvResponse;
 import com.tncv.cv_service.entity.Cv;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CvRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,10 @@ public class CvService {
     public CvService(CvRepository cvRepository) {
         this.cvRepository = cvRepository;
     }
+
+    // ============================================================
+    // CREATE
+    // ============================================================
 
     public CvResponse createCv(String userId, CvRequest request) {
 
@@ -36,6 +41,10 @@ public class CvService {
         return new CvResponse(savedCv);
     }
 
+    // ============================================================
+    // GET ALL USER CVS
+    // ============================================================
+
     public List<CvResponse> getUserCvs(String userId) {
 
         return cvRepository.findByUserId(userId)
@@ -44,13 +53,22 @@ public class CvService {
                 .toList();
     }
 
+    // ============================================================
+    // GET ONE CV
+    // ============================================================
+
     public CvResponse getCv(Long id, String userId) {
 
         Cv cv = cvRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("CV introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "CV introuvable avec l'id : " + id));
 
         return new CvResponse(cv);
     }
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
 
     public CvResponse updateCv(
             Long id,
@@ -58,7 +76,8 @@ public class CvService {
             CvRequest request) {
 
         Cv cv = cvRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("CV introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "CV introuvable avec l'id : " + id));
 
         cv.setTitle(request.getTitle());
         cv.setFullName(request.getFullName());
@@ -74,10 +93,15 @@ public class CvService {
         return new CvResponse(updatedCv);
     }
 
+    // ============================================================
+    // DELETE
+    // ============================================================
+
     public void deleteCv(Long id, String userId) {
 
         Cv cv = cvRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("CV introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "CV introuvable avec l'id : " + id));
 
         cvRepository.delete(cv);
     }

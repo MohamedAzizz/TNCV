@@ -4,6 +4,7 @@ import com.tncv.cv_service.dto.ProjectRequest;
 import com.tncv.cv_service.dto.ProjectResponse;
 import com.tncv.cv_service.entity.Cv;
 import com.tncv.cv_service.entity.Project;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CvRepository;
 import com.tncv.cv_service.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,22 @@ public class ProjectService {
     public ProjectService(
             ProjectRepository projectRepository,
             CvRepository cvRepository) {
+
         this.projectRepository = projectRepository;
         this.cvRepository = cvRepository;
     }
 
+    // ============================================================
     // CREATE
+    // ============================================================
+
     public ProjectResponse create(
             Long cvId,
             ProjectRequest request) {
 
-        Cv cv = cvRepository.findById(cvId)
-                .orElseThrow(() -> new RuntimeException(
+        Cv cv = cvRepository
+                .findById(cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + cvId));
 
         Project project = new Project();
@@ -50,38 +56,52 @@ public class ProjectService {
         return new ProjectResponse(savedProject);
     }
 
+    // ============================================================
     // GET ALL
+    // ============================================================
+
     public List<ProjectResponse> getByCv(Long cvId) {
 
-        return projectRepository.findByCvId(cvId)
+        return projectRepository
+                .findByCvId(cvId)
                 .stream()
                 .map(ProjectResponse::new)
                 .toList();
     }
 
+    // ============================================================
     // GET ONE
+    // ============================================================
+
     public ProjectResponse get(
             Long cvId,
             Long projectId) {
 
         Project project = projectRepository
-                .findByIdAndCvId(projectId, cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .findByIdAndCvId(
+                        projectId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Projet introuvable avec l'id : "
                                 + projectId));
 
         return new ProjectResponse(project);
     }
 
+    // ============================================================
     // UPDATE
+    // ============================================================
+
     public ProjectResponse update(
             Long cvId,
             Long projectId,
             ProjectRequest request) {
 
         Project project = projectRepository
-                .findByIdAndCvId(projectId, cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .findByIdAndCvId(
+                        projectId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Projet introuvable avec l'id : "
                                 + projectId));
 
@@ -99,14 +119,19 @@ public class ProjectService {
         return new ProjectResponse(updatedProject);
     }
 
+    // ============================================================
     // DELETE
+    // ============================================================
+
     public void delete(
             Long cvId,
             Long projectId) {
 
         Project project = projectRepository
-                .findByIdAndCvId(projectId, cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .findByIdAndCvId(
+                        projectId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Projet introuvable avec l'id : "
                                 + projectId));
 

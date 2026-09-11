@@ -4,6 +4,7 @@ import com.tncv.cv_service.dto.EducationRequest;
 import com.tncv.cv_service.dto.EducationResponse;
 import com.tncv.cv_service.entity.Cv;
 import com.tncv.cv_service.entity.Education;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CvRepository;
 import com.tncv.cv_service.repository.EducationRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import java.util.List;
 public class EducationService {
 
     private final EducationRepository educationRepository;
-
     private final CvRepository cvRepository;
 
     // ============================================================
@@ -26,7 +26,6 @@ public class EducationService {
             CvRepository cvRepository) {
 
         this.educationRepository = educationRepository;
-
         this.cvRepository = cvRepository;
     }
 
@@ -40,40 +39,23 @@ public class EducationService {
 
         Cv cv = cvRepository
                 .findById(cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "CV introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "CV introuvable avec l'id : " + cvId));
 
         Education education = new Education();
 
-        education.setInstitution(
-                request.getInstitution());
+        education.setInstitution(request.getInstitution());
+        education.setDegree(request.getDegree());
+        education.setFieldOfStudy(request.getFieldOfStudy());
+        education.setLocation(request.getLocation());
+        education.setStartDate(request.getStartDate());
+        education.setEndDate(request.getEndDate());
+        education.setCurrent(request.isCurrent());
+        education.setDescription(request.getDescription());
 
-        education.setDegree(
-                request.getDegree());
-
-        education.setFieldOfStudy(
-                request.getFieldOfStudy());
-
-        education.setLocation(
-                request.getLocation());
-
-        education.setStartDate(
-                request.getStartDate());
-
-        education.setEndDate(
-                request.getEndDate());
-
-        education.setCurrent(
-                request.isCurrent());
-
-        education.setDescription(
-                request.getDescription());
-
-        // Association avec le CV
         education.setCv(cv);
 
-        Education saved = educationRepository.save(
-                education);
+        Education saved = educationRepository.save(education);
 
         return new EducationResponse(saved);
     }
@@ -82,8 +64,7 @@ public class EducationService {
     // GET ALL
     // ============================================================
 
-    public List<EducationResponse> getByCv(
-            Long cvId) {
+    public List<EducationResponse> getByCv(Long cvId) {
 
         return educationRepository
                 .findByCvId(cvId)
@@ -104,11 +85,11 @@ public class EducationService {
                 .findByIdAndCvId(
                         educationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Formation introuvable avec l'id : "
+                                + educationId));
 
-        return new EducationResponse(
-                education);
+        return new EducationResponse(education);
     }
 
     // ============================================================
@@ -124,38 +105,22 @@ public class EducationService {
                 .findByIdAndCvId(
                         educationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Formation introuvable avec l'id : "
+                                + educationId));
 
-        education.setInstitution(
-                request.getInstitution());
+        education.setInstitution(request.getInstitution());
+        education.setDegree(request.getDegree());
+        education.setFieldOfStudy(request.getFieldOfStudy());
+        education.setLocation(request.getLocation());
+        education.setStartDate(request.getStartDate());
+        education.setEndDate(request.getEndDate());
+        education.setCurrent(request.isCurrent());
+        education.setDescription(request.getDescription());
 
-        education.setDegree(
-                request.getDegree());
+        Education updated = educationRepository.save(education);
 
-        education.setFieldOfStudy(
-                request.getFieldOfStudy());
-
-        education.setLocation(
-                request.getLocation());
-
-        education.setStartDate(
-                request.getStartDate());
-
-        education.setEndDate(
-                request.getEndDate());
-
-        education.setCurrent(
-                request.isCurrent());
-
-        education.setDescription(
-                request.getDescription());
-
-        Education updated = educationRepository.save(
-                education);
-
-        return new EducationResponse(
-                updated);
+        return new EducationResponse(updated);
     }
 
     // ============================================================
@@ -170,10 +135,10 @@ public class EducationService {
                 .findByIdAndCvId(
                         educationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Formation introuvable avec l'id : "
+                                + educationId));
 
-        educationRepository.delete(
-                education);
+        educationRepository.delete(education);
     }
 }

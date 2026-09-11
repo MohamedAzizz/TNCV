@@ -4,6 +4,7 @@ import com.tncv.cv_service.dto.CertificationRequest;
 import com.tncv.cv_service.dto.CertificationResponse;
 import com.tncv.cv_service.entity.Certification;
 import com.tncv.cv_service.entity.Cv;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CertificationRepository;
 import com.tncv.cv_service.repository.CvRepository;
 import org.springframework.stereotype.Service;
@@ -19,54 +20,77 @@ public class CertificationService {
     public CertificationService(
             CertificationRepository certificationRepository,
             CvRepository cvRepository) {
+
         this.certificationRepository = certificationRepository;
         this.cvRepository = cvRepository;
     }
 
+    // ============================================================
     // CREATE
+    // ============================================================
+
     public CertificationResponse create(
             Long cvId,
             CertificationRequest request) {
 
-        Cv cv = cvRepository.findById(cvId)
-                .orElseThrow(() -> new RuntimeException(
+        Cv cv = cvRepository
+                .findById(cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + cvId));
 
         Certification certification = new Certification();
 
-        certification.setName(request.getName());
+        certification.setName(
+                request.getName());
+
         certification.setIssuingOrganization(
                 request.getIssuingOrganization());
+
         certification.setIssueDate(
                 request.getIssueDate());
+
         certification.setExpirationDate(
                 request.getExpirationDate());
+
         certification.setNoExpiration(
                 request.isNoExpiration());
+
         certification.setCredentialId(
                 request.getCredentialId());
+
         certification.setCredentialUrl(
                 request.getCredentialUrl());
+
         certification.setDescription(
                 request.getDescription());
 
+        // Association avec le CV
         certification.setCv(cv);
 
         Certification savedCertification = certificationRepository.save(certification);
 
-        return new CertificationResponse(savedCertification);
+        return new CertificationResponse(
+                savedCertification);
     }
 
+    // ============================================================
     // GET ALL
-    public List<CertificationResponse> getByCv(Long cvId) {
+    // ============================================================
 
-        return certificationRepository.findByCvId(cvId)
+    public List<CertificationResponse> getByCv(
+            Long cvId) {
+
+        return certificationRepository
+                .findByCvId(cvId)
                 .stream()
                 .map(CertificationResponse::new)
                 .toList();
     }
 
+    // ============================================================
     // GET ONE
+    // ============================================================
+
     public CertificationResponse get(
             Long cvId,
             Long certificationId) {
@@ -75,14 +99,18 @@ public class CertificationService {
                 .findByIdAndCvId(
                         certificationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Certification introuvable avec l'id : "
                                 + certificationId));
 
-        return new CertificationResponse(certification);
+        return new CertificationResponse(
+                certification);
     }
 
+    // ============================================================
     // UPDATE
+    // ============================================================
+
     public CertificationResponse update(
             Long cvId,
             Long certificationId,
@@ -92,11 +120,12 @@ public class CertificationService {
                 .findByIdAndCvId(
                         certificationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Certification introuvable avec l'id : "
                                 + certificationId));
 
-        certification.setName(request.getName());
+        certification.setName(
+                request.getName());
 
         certification.setIssuingOrganization(
                 request.getIssuingOrganization());
@@ -119,12 +148,17 @@ public class CertificationService {
         certification.setDescription(
                 request.getDescription());
 
-        Certification updatedCertification = certificationRepository.save(certification);
+        Certification updatedCertification = certificationRepository.save(
+                certification);
 
-        return new CertificationResponse(updatedCertification);
+        return new CertificationResponse(
+                updatedCertification);
     }
 
+    // ============================================================
     // DELETE
+    // ============================================================
+
     public void delete(
             Long cvId,
             Long certificationId) {
@@ -133,10 +167,11 @@ public class CertificationService {
                 .findByIdAndCvId(
                         certificationId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Certification introuvable avec l'id : "
                                 + certificationId));
 
-        certificationRepository.delete(certification);
+        certificationRepository.delete(
+                certification);
     }
 }

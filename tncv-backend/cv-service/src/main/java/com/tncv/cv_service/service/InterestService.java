@@ -4,6 +4,7 @@ import com.tncv.cv_service.dto.InterestRequest;
 import com.tncv.cv_service.dto.InterestResponse;
 import com.tncv.cv_service.entity.Cv;
 import com.tncv.cv_service.entity.Interest;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CvRepository;
 import com.tncv.cv_service.repository.InterestRepository;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,22 @@ public class InterestService {
     public InterestService(
             InterestRepository interestRepository,
             CvRepository cvRepository) {
+
         this.interestRepository = interestRepository;
         this.cvRepository = cvRepository;
     }
 
+    // ============================================================
     // CREATE
+    // ============================================================
+
     public InterestResponse create(
             Long cvId,
             InterestRequest request) {
 
-        Cv cv = cvRepository.findById(cvId)
-                .orElseThrow(() -> new RuntimeException(
+        Cv cv = cvRepository
+                .findById(cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + cvId));
 
         Interest interest = new Interest();
@@ -45,16 +51,23 @@ public class InterestService {
         return new InterestResponse(savedInterest);
     }
 
+    // ============================================================
     // GET ALL
+    // ============================================================
+
     public List<InterestResponse> getByCv(Long cvId) {
 
-        return interestRepository.findByCvId(cvId)
+        return interestRepository
+                .findByCvId(cvId)
                 .stream()
                 .map(InterestResponse::new)
                 .toList();
     }
 
+    // ============================================================
     // GET ONE
+    // ============================================================
+
     public InterestResponse get(
             Long cvId,
             Long interestId) {
@@ -63,14 +76,17 @@ public class InterestService {
                 .findByIdAndCvId(
                         interestId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Centre d'intérêt introuvable avec l'id : "
                                 + interestId));
 
         return new InterestResponse(interest);
     }
 
+    // ============================================================
     // UPDATE
+    // ============================================================
+
     public InterestResponse update(
             Long cvId,
             Long interestId,
@@ -80,7 +96,7 @@ public class InterestService {
                 .findByIdAndCvId(
                         interestId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Centre d'intérêt introuvable avec l'id : "
                                 + interestId));
 
@@ -93,7 +109,10 @@ public class InterestService {
         return new InterestResponse(updatedInterest);
     }
 
+    // ============================================================
     // DELETE
+    // ============================================================
+
     public void delete(
             Long cvId,
             Long interestId) {
@@ -102,7 +121,7 @@ public class InterestService {
                 .findByIdAndCvId(
                         interestId,
                         cvId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Centre d'intérêt introuvable avec l'id : "
                                 + interestId));
 
