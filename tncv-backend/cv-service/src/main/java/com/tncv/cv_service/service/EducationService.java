@@ -14,131 +14,123 @@ import java.util.List;
 @Service
 public class EducationService {
 
-    private final EducationRepository educationRepository;
-    private final CvRepository cvRepository;
+        private final EducationRepository educationRepository;
+        private final CvRepository cvRepository;
 
-    // ============================================================
-    // CONSTRUCTOR
-    // ============================================================
+        public EducationService(
+                        EducationRepository educationRepository,
+                        CvRepository cvRepository) {
 
-    public EducationService(
-            EducationRepository educationRepository,
-            CvRepository cvRepository) {
+                this.educationRepository = educationRepository;
+                this.cvRepository = cvRepository;
+        }
 
-        this.educationRepository = educationRepository;
-        this.cvRepository = cvRepository;
-    }
+        private Cv getOwnedCv(Long cvId, String userId) {
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-    public EducationResponse create(
-            Long cvId,
-            EducationRequest request) {
+        public EducationResponse create(
+                        Long cvId,
+                        String userId,
+                        EducationRequest request) {
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+                Cv cv = getOwnedCv(cvId, userId);
 
-        Education education = new Education();
+                Education education = new Education();
 
-        education.setInstitution(request.getInstitution());
-        education.setDegree(request.getDegree());
-        education.setFieldOfStudy(request.getFieldOfStudy());
-        education.setLocation(request.getLocation());
-        education.setStartDate(request.getStartDate());
-        education.setEndDate(request.getEndDate());
-        education.setCurrent(request.isCurrent());
-        education.setDescription(request.getDescription());
+                education.setInstitution(request.getInstitution());
+                education.setDegree(request.getDegree());
+                education.setFieldOfStudy(request.getFieldOfStudy());
+                education.setLocation(request.getLocation());
+                education.setStartDate(request.getStartDate());
+                education.setEndDate(request.getEndDate());
+                education.setCurrent(request.isCurrent());
+                education.setDescription(request.getDescription());
+                education.setCv(cv);
 
-        education.setCv(cv);
+                return new EducationResponse(
+                                educationRepository.save(education));
+        }
 
-        Education saved = educationRepository.save(education);
+        public List<EducationResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-        return new EducationResponse(saved);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                return educationRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(EducationResponse::new)
+                                .toList();
+        }
 
-    public List<EducationResponse> getByCv(Long cvId) {
+        public EducationResponse get(
+                        Long cvId,
+                        Long educationId,
+                        String userId) {
 
-        return educationRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(EducationResponse::new)
-                .toList();
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                Education education = educationRepository
+                                .findByIdAndCvId(
+                                                educationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Formation introuvable avec l'id : "
+                                                                + educationId));
 
-    public EducationResponse get(
-            Long cvId,
-            Long educationId) {
+                return new EducationResponse(education);
+        }
 
-        Education education = educationRepository
-                .findByIdAndCvId(
-                        educationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Formation introuvable avec l'id : "
-                                + educationId));
+        public EducationResponse update(
+                        Long cvId,
+                        Long educationId,
+                        String userId,
+                        EducationRequest request) {
 
-        return new EducationResponse(education);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                Education education = educationRepository
+                                .findByIdAndCvId(
+                                                educationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Formation introuvable avec l'id : "
+                                                                + educationId));
 
-    public EducationResponse update(
-            Long cvId,
-            Long educationId,
-            EducationRequest request) {
+                education.setInstitution(request.getInstitution());
+                education.setDegree(request.getDegree());
+                education.setFieldOfStudy(request.getFieldOfStudy());
+                education.setLocation(request.getLocation());
+                education.setStartDate(request.getStartDate());
+                education.setEndDate(request.getEndDate());
+                education.setCurrent(request.isCurrent());
+                education.setDescription(request.getDescription());
 
-        Education education = educationRepository
-                .findByIdAndCvId(
-                        educationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Formation introuvable avec l'id : "
-                                + educationId));
+                return new EducationResponse(
+                                educationRepository.save(education));
+        }
 
-        education.setInstitution(request.getInstitution());
-        education.setDegree(request.getDegree());
-        education.setFieldOfStudy(request.getFieldOfStudy());
-        education.setLocation(request.getLocation());
-        education.setStartDate(request.getStartDate());
-        education.setEndDate(request.getEndDate());
-        education.setCurrent(request.isCurrent());
-        education.setDescription(request.getDescription());
+        public void delete(
+                        Long cvId,
+                        Long educationId,
+                        String userId) {
 
-        Education updated = educationRepository.save(education);
+                getOwnedCv(cvId, userId);
 
-        return new EducationResponse(updated);
-    }
+                Education education = educationRepository
+                                .findByIdAndCvId(
+                                                educationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Formation introuvable avec l'id : "
+                                                                + educationId));
 
-    // ============================================================
-    // DELETE
-    // ============================================================
-
-    public void delete(
-            Long cvId,
-            Long educationId) {
-
-        Education education = educationRepository
-                .findByIdAndCvId(
-                        educationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Formation introuvable avec l'id : "
-                                + educationId));
-
-        educationRepository.delete(education);
-    }
+                educationRepository.delete(education);
+        }
 }

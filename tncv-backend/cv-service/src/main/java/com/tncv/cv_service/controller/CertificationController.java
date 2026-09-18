@@ -4,7 +4,9 @@ import com.tncv.cv_service.dto.CertificationRequest;
 import com.tncv.cv_service.dto.CertificationResponse;
 import com.tncv.cv_service.service.CertificationService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,70 +15,112 @@ import java.util.List;
 @RequestMapping("/api/cvs/{cvId}/certifications")
 public class CertificationController {
 
-    private final CertificationService certificationService;
+        private final CertificationService certificationService;
 
-    public CertificationController(
-            CertificationService certificationService) {
-        this.certificationService = certificationService;
-    }
+        public CertificationController(
+                        CertificationService certificationService) {
 
-    // CREATE
-    @PostMapping
-    public ResponseEntity<CertificationResponse> create(
-            @PathVariable Long cvId,
-            @Valid @RequestBody CertificationRequest request) {
+                this.certificationService = certificationService;
+        }
 
-        return ResponseEntity.ok(
-                certificationService.create(
-                        cvId,
-                        request));
-    }
+        // ============================================================
+        // CREATE
+        // ============================================================
 
-    // GET ALL
-    @GetMapping
-    public ResponseEntity<List<CertificationResponse>> getAll(
-            @PathVariable Long cvId) {
+        @PostMapping
+        public ResponseEntity<CertificationResponse> create(
+                        @PathVariable Long cvId,
+                        Authentication authentication,
+                        @Valid @RequestBody CertificationRequest request) {
 
-        return ResponseEntity.ok(
-                certificationService.getByCv(cvId));
-    }
+                String userId = authentication.getName();
 
-    // GET ONE
-    @GetMapping("/{certificationId}")
-    public ResponseEntity<CertificationResponse> get(
-            @PathVariable Long cvId,
-            @PathVariable Long certificationId) {
+                CertificationResponse response = certificationService.create(
+                                cvId,
+                                userId,
+                                request);
 
-        return ResponseEntity.ok(
-                certificationService.get(
-                        cvId,
-                        certificationId));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    // UPDATE
-    @PutMapping("/{certificationId}")
-    public ResponseEntity<CertificationResponse> update(
-            @PathVariable Long cvId,
-            @PathVariable Long certificationId,
-            @Valid @RequestBody CertificationRequest request) {
+        // ============================================================
+        // GET ALL
+        // ============================================================
 
-        return ResponseEntity.ok(
-                certificationService.update(
-                        cvId,
-                        certificationId,
-                        request));
-    }
+        @GetMapping
+        public ResponseEntity<List<CertificationResponse>> getAll(
+                        @PathVariable Long cvId,
+                        Authentication authentication) {
 
-    // DELETE
-    @DeleteMapping("/{certificationId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable Long cvId,
-            @PathVariable Long certificationId) {
+                String userId = authentication.getName();
 
-        certificationService.delete(
-                cvId,
-                certificationId);
+                return ResponseEntity.ok(
+                                certificationService.getByCv(
+                                                cvId,
+                                                userId));
+        }
 
-        return ResponseEntity.noContent().build();
-    }
+        // ============================================================
+        // GET ONE
+        // ============================================================
+
+        @GetMapping("/{certificationId}")
+        public ResponseEntity<CertificationResponse> get(
+                        @PathVariable Long cvId,
+                        @PathVariable Long certificationId,
+                        Authentication authentication) {
+
+                String userId = authentication.getName();
+
+                return ResponseEntity.ok(
+                                certificationService.get(
+                                                cvId,
+                                                certificationId,
+                                                userId));
+        }
+
+        // ============================================================
+        // UPDATE
+        // ============================================================
+
+        @PutMapping("/{certificationId}")
+        public ResponseEntity<CertificationResponse> update(
+                        @PathVariable Long cvId,
+                        @PathVariable Long certificationId,
+                        Authentication authentication,
+                        @Valid @RequestBody CertificationRequest request) {
+
+                String userId = authentication.getName();
+
+                return ResponseEntity.ok(
+                                certificationService.update(
+                                                cvId,
+                                                certificationId,
+                                                userId,
+                                                request));
+        }
+
+        // ============================================================
+        // DELETE
+        // ============================================================
+
+        @DeleteMapping("/{certificationId}")
+        public ResponseEntity<Void> delete(
+                        @PathVariable Long cvId,
+                        @PathVariable Long certificationId,
+                        Authentication authentication) {
+
+                String userId = authentication.getName();
+
+                certificationService.delete(
+                                cvId,
+                                certificationId,
+                                userId);
+
+                return ResponseEntity
+                                .noContent()
+                                .build();
+        }
 }

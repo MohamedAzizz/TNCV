@@ -4,7 +4,9 @@ import com.tncv.cv_service.dto.ProjectRequest;
 import com.tncv.cv_service.dto.ProjectResponse;
 import com.tncv.cv_service.service.ProjectService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,56 +21,81 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<ProjectResponse> create(
             @PathVariable Long cvId,
+            Authentication authentication,
             @Valid @RequestBody ProjectRequest request) {
 
-        return ResponseEntity.ok(
-                projectService.create(cvId, request));
+        String userId = authentication.getName();
+
+        ProjectResponse response = projectService.create(
+                cvId,
+                userId,
+                request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    // GET ALL
     @GetMapping
     public ResponseEntity<List<ProjectResponse>> getAll(
-            @PathVariable Long cvId) {
+            @PathVariable Long cvId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                projectService.getByCv(cvId));
+                projectService.getByCv(
+                        cvId,
+                        userId));
     }
 
-    // GET ONE
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> get(
             @PathVariable Long cvId,
-            @PathVariable Long projectId) {
+            @PathVariable Long projectId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                projectService.get(cvId, projectId));
+                projectService.get(
+                        cvId,
+                        projectId,
+                        userId));
     }
 
-    // UPDATE
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> update(
             @PathVariable Long cvId,
             @PathVariable Long projectId,
+            Authentication authentication,
             @Valid @RequestBody ProjectRequest request) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
                 projectService.update(
                         cvId,
                         projectId,
+                        userId,
                         request));
     }
 
-    // DELETE
     @DeleteMapping("/{projectId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long cvId,
-            @PathVariable Long projectId) {
+            @PathVariable Long projectId,
+            Authentication authentication) {
 
-        projectService.delete(cvId, projectId);
+        String userId = authentication.getName();
+
+        projectService.delete(
+                cvId,
+                projectId,
+                userId);
 
         return ResponseEntity.noContent().build();
     }

@@ -4,7 +4,9 @@ import com.tncv.cv_service.dto.LanguageRequest;
 import com.tncv.cv_service.dto.LanguageResponse;
 import com.tncv.cv_service.service.LanguageService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,56 +21,81 @@ public class LanguageController {
         this.languageService = languageService;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<LanguageResponse> create(
             @PathVariable Long cvId,
+            Authentication authentication,
             @Valid @RequestBody LanguageRequest request) {
 
-        return ResponseEntity.ok(
-                languageService.create(cvId, request));
+        String userId = authentication.getName();
+
+        LanguageResponse response = languageService.create(
+                cvId,
+                userId,
+                request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    // GET ALL
     @GetMapping
     public ResponseEntity<List<LanguageResponse>> getAll(
-            @PathVariable Long cvId) {
+            @PathVariable Long cvId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                languageService.getByCv(cvId));
+                languageService.getByCv(
+                        cvId,
+                        userId));
     }
 
-    // GET ONE
     @GetMapping("/{languageId}")
     public ResponseEntity<LanguageResponse> get(
             @PathVariable Long cvId,
-            @PathVariable Long languageId) {
+            @PathVariable Long languageId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                languageService.get(cvId, languageId));
+                languageService.get(
+                        cvId,
+                        languageId,
+                        userId));
     }
 
-    // UPDATE
     @PutMapping("/{languageId}")
     public ResponseEntity<LanguageResponse> update(
             @PathVariable Long cvId,
             @PathVariable Long languageId,
+            Authentication authentication,
             @Valid @RequestBody LanguageRequest request) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
                 languageService.update(
                         cvId,
                         languageId,
+                        userId,
                         request));
     }
 
-    // DELETE
     @DeleteMapping("/{languageId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long cvId,
-            @PathVariable Long languageId) {
+            @PathVariable Long languageId,
+            Authentication authentication) {
 
-        languageService.delete(cvId, languageId);
+        String userId = authentication.getName();
+
+        languageService.delete(
+                cvId,
+                languageId,
+                userId);
 
         return ResponseEntity.noContent().build();
     }

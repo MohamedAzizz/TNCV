@@ -14,164 +14,171 @@ import java.util.List;
 @Service
 public class CertificationService {
 
-    private final CertificationRepository certificationRepository;
-    private final CvRepository cvRepository;
+        private final CertificationRepository certificationRepository;
+        private final CvRepository cvRepository;
 
-    public CertificationService(
-            CertificationRepository certificationRepository,
-            CvRepository cvRepository) {
+        public CertificationService(
+                        CertificationRepository certificationRepository,
+                        CvRepository cvRepository) {
 
-        this.certificationRepository = certificationRepository;
-        this.cvRepository = cvRepository;
-    }
+                this.certificationRepository = certificationRepository;
+                this.cvRepository = cvRepository;
+        }
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+        // ============================================================
+        // VERIFY CV OWNERSHIP
+        // ============================================================
 
-    public CertificationResponse create(
-            Long cvId,
-            CertificationRequest request) {
+        private Cv getOwnedCv(
+                        Long cvId,
+                        String userId) {
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-        Certification certification = new Certification();
+        // ============================================================
+        // CREATE
+        // ============================================================
 
-        certification.setName(
-                request.getName());
+        public CertificationResponse create(
+                        Long cvId,
+                        String userId,
+                        CertificationRequest request) {
 
-        certification.setIssuingOrganization(
-                request.getIssuingOrganization());
+                Cv cv = getOwnedCv(cvId, userId);
 
-        certification.setIssueDate(
-                request.getIssueDate());
+                Certification certification = new Certification();
 
-        certification.setExpirationDate(
-                request.getExpirationDate());
+                certification.setName(request.getName());
+                certification.setIssuingOrganization(
+                                request.getIssuingOrganization());
+                certification.setIssueDate(
+                                request.getIssueDate());
+                certification.setExpirationDate(
+                                request.getExpirationDate());
+                certification.setNoExpiration(
+                                request.isNoExpiration());
+                certification.setCredentialId(
+                                request.getCredentialId());
+                certification.setCredentialUrl(
+                                request.getCredentialUrl());
+                certification.setDescription(
+                                request.getDescription());
 
-        certification.setNoExpiration(
-                request.isNoExpiration());
+                certification.setCv(cv);
 
-        certification.setCredentialId(
-                request.getCredentialId());
+                Certification savedCertification = certificationRepository.save(certification);
 
-        certification.setCredentialUrl(
-                request.getCredentialUrl());
+                return new CertificationResponse(
+                                savedCertification);
+        }
 
-        certification.setDescription(
-                request.getDescription());
+        // ============================================================
+        // GET ALL
+        // ============================================================
 
-        // Association avec le CV
-        certification.setCv(cv);
+        public List<CertificationResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-        Certification savedCertification = certificationRepository.save(certification);
+                getOwnedCv(cvId, userId);
 
-        return new CertificationResponse(
-                savedCertification);
-    }
+                return certificationRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(CertificationResponse::new)
+                                .toList();
+        }
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+        // ============================================================
+        // GET ONE
+        // ============================================================
 
-    public List<CertificationResponse> getByCv(
-            Long cvId) {
+        public CertificationResponse get(
+                        Long cvId,
+                        Long certificationId,
+                        String userId) {
 
-        return certificationRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(CertificationResponse::new)
-                .toList();
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                Certification certification = certificationRepository
+                                .findByIdAndCvId(
+                                                certificationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Certification introuvable avec l'id : "
+                                                                + certificationId));
 
-    public CertificationResponse get(
-            Long cvId,
-            Long certificationId) {
+                return new CertificationResponse(
+                                certification);
+        }
 
-        Certification certification = certificationRepository
-                .findByIdAndCvId(
-                        certificationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Certification introuvable avec l'id : "
-                                + certificationId));
+        // ============================================================
+        // UPDATE
+        // ============================================================
 
-        return new CertificationResponse(
-                certification);
-    }
+        public CertificationResponse update(
+                        Long cvId,
+                        Long certificationId,
+                        String userId,
+                        CertificationRequest request) {
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public CertificationResponse update(
-            Long cvId,
-            Long certificationId,
-            CertificationRequest request) {
+                Certification certification = certificationRepository
+                                .findByIdAndCvId(
+                                                certificationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Certification introuvable avec l'id : "
+                                                                + certificationId));
 
-        Certification certification = certificationRepository
-                .findByIdAndCvId(
-                        certificationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Certification introuvable avec l'id : "
-                                + certificationId));
+                certification.setName(request.getName());
+                certification.setIssuingOrganization(
+                                request.getIssuingOrganization());
+                certification.setIssueDate(
+                                request.getIssueDate());
+                certification.setExpirationDate(
+                                request.getExpirationDate());
+                certification.setNoExpiration(
+                                request.isNoExpiration());
+                certification.setCredentialId(
+                                request.getCredentialId());
+                certification.setCredentialUrl(
+                                request.getCredentialUrl());
+                certification.setDescription(
+                                request.getDescription());
 
-        certification.setName(
-                request.getName());
+                Certification updatedCertification = certificationRepository.save(
+                                certification);
 
-        certification.setIssuingOrganization(
-                request.getIssuingOrganization());
+                return new CertificationResponse(
+                                updatedCertification);
+        }
 
-        certification.setIssueDate(
-                request.getIssueDate());
+        // ============================================================
+        // DELETE
+        // ============================================================
 
-        certification.setExpirationDate(
-                request.getExpirationDate());
+        public void delete(
+                        Long cvId,
+                        Long certificationId,
+                        String userId) {
 
-        certification.setNoExpiration(
-                request.isNoExpiration());
+                getOwnedCv(cvId, userId);
 
-        certification.setCredentialId(
-                request.getCredentialId());
+                Certification certification = certificationRepository
+                                .findByIdAndCvId(
+                                                certificationId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Certification introuvable avec l'id : "
+                                                                + certificationId));
 
-        certification.setCredentialUrl(
-                request.getCredentialUrl());
-
-        certification.setDescription(
-                request.getDescription());
-
-        Certification updatedCertification = certificationRepository.save(
-                certification);
-
-        return new CertificationResponse(
-                updatedCertification);
-    }
-
-    // ============================================================
-    // DELETE
-    // ============================================================
-
-    public void delete(
-            Long cvId,
-            Long certificationId) {
-
-        Certification certification = certificationRepository
-                .findByIdAndCvId(
-                        certificationId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Certification introuvable avec l'id : "
-                                + certificationId));
-
-        certificationRepository.delete(
-                certification);
-    }
+                certificationRepository.delete(
+                                certification);
+        }
 }

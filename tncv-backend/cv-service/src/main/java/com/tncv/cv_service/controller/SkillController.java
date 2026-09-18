@@ -4,7 +4,9 @@ import com.tncv.cv_service.dto.SkillRequest;
 import com.tncv.cv_service.dto.SkillResponse;
 import com.tncv.cv_service.service.SkillService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,53 +21,81 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    // CREATE
     @PostMapping
     public ResponseEntity<SkillResponse> create(
             @PathVariable Long cvId,
+            Authentication authentication,
             @Valid @RequestBody SkillRequest request) {
 
-        return ResponseEntity.ok(
-                skillService.create(cvId, request));
+        String userId = authentication.getName();
+
+        SkillResponse response = skillService.create(
+                cvId,
+                userId,
+                request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    // GET ALL
     @GetMapping
     public ResponseEntity<List<SkillResponse>> getAll(
-            @PathVariable Long cvId) {
+            @PathVariable Long cvId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                skillService.getByCv(cvId));
+                skillService.getByCv(
+                        cvId,
+                        userId));
     }
 
-    // GET ONE
     @GetMapping("/{skillId}")
     public ResponseEntity<SkillResponse> get(
             @PathVariable Long cvId,
-            @PathVariable Long skillId) {
+            @PathVariable Long skillId,
+            Authentication authentication) {
+
+        String userId = authentication.getName();
 
         return ResponseEntity.ok(
-                skillService.get(cvId, skillId));
+                skillService.get(
+                        cvId,
+                        skillId,
+                        userId));
     }
 
-    // UPDATE
     @PutMapping("/{skillId}")
     public ResponseEntity<SkillResponse> update(
             @PathVariable Long cvId,
             @PathVariable Long skillId,
+            Authentication authentication,
             @Valid @RequestBody SkillRequest request) {
 
+        String userId = authentication.getName();
+
         return ResponseEntity.ok(
-                skillService.update(cvId, skillId, request));
+                skillService.update(
+                        cvId,
+                        skillId,
+                        userId,
+                        request));
     }
 
-    // DELETE
     @DeleteMapping("/{skillId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long cvId,
-            @PathVariable Long skillId) {
+            @PathVariable Long skillId,
+            Authentication authentication) {
 
-        skillService.delete(cvId, skillId);
+        String userId = authentication.getName();
+
+        skillService.delete(
+                cvId,
+                skillId,
+                userId);
 
         return ResponseEntity.noContent().build();
     }

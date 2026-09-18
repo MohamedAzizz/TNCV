@@ -14,125 +14,121 @@ import java.util.List;
 @Service
 public class ExperienceService {
 
-    private final ExperienceRepository experienceRepository;
-    private final CvRepository cvRepository;
+        private final ExperienceRepository experienceRepository;
+        private final CvRepository cvRepository;
 
-    public ExperienceService(
-            ExperienceRepository experienceRepository,
-            CvRepository cvRepository) {
+        public ExperienceService(
+                        ExperienceRepository experienceRepository,
+                        CvRepository cvRepository) {
 
-        this.experienceRepository = experienceRepository;
-        this.cvRepository = cvRepository;
-    }
+                this.experienceRepository = experienceRepository;
+                this.cvRepository = cvRepository;
+        }
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+        private Cv getOwnedCv(Long cvId, String userId) {
 
-    public ExperienceResponse create(
-            Long cvId,
-            ExperienceRequest request) {
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+        public ExperienceResponse create(
+                        Long cvId,
+                        String userId,
+                        ExperienceRequest request) {
 
-        Experience experience = new Experience();
+                Cv cv = getOwnedCv(cvId, userId);
 
-        experience.setCompany(request.getCompany());
-        experience.setPosition(request.getPosition());
-        experience.setLocation(request.getLocation());
-        experience.setStartDate(request.getStartDate());
-        experience.setEndDate(request.getEndDate());
-        experience.setCurrent(request.isCurrent());
-        experience.setDescription(request.getDescription());
+                Experience experience = new Experience();
 
-        experience.setCv(cv);
+                experience.setCompany(request.getCompany());
+                experience.setPosition(request.getPosition());
+                experience.setLocation(request.getLocation());
+                experience.setStartDate(request.getStartDate());
+                experience.setEndDate(request.getEndDate());
+                experience.setCurrent(request.isCurrent());
+                experience.setDescription(request.getDescription());
+                experience.setCv(cv);
 
-        Experience saved = experienceRepository.save(experience);
+                return new ExperienceResponse(
+                                experienceRepository.save(experience));
+        }
 
-        return new ExperienceResponse(saved);
-    }
+        public List<ExperienceResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public List<ExperienceResponse> getByCv(Long cvId) {
+                return experienceRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(ExperienceResponse::new)
+                                .toList();
+        }
 
-        return experienceRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(ExperienceResponse::new)
-                .toList();
-    }
+        public ExperienceResponse get(
+                        Long cvId,
+                        Long experienceId,
+                        String userId) {
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public ExperienceResponse get(
-            Long cvId,
-            Long experienceId) {
+                Experience experience = experienceRepository
+                                .findByIdAndCvId(
+                                                experienceId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Expérience introuvable avec l'id : "
+                                                                + experienceId));
 
-        Experience experience = experienceRepository
-                .findByIdAndCvId(
-                        experienceId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Expérience introuvable avec l'id : "
-                                + experienceId));
+                return new ExperienceResponse(experience);
+        }
 
-        return new ExperienceResponse(experience);
-    }
+        public ExperienceResponse update(
+                        Long cvId,
+                        Long experienceId,
+                        String userId,
+                        ExperienceRequest request) {
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public ExperienceResponse update(
-            Long cvId,
-            Long experienceId,
-            ExperienceRequest request) {
+                Experience experience = experienceRepository
+                                .findByIdAndCvId(
+                                                experienceId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Expérience introuvable avec l'id : "
+                                                                + experienceId));
 
-        Experience experience = experienceRepository
-                .findByIdAndCvId(
-                        experienceId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Expérience introuvable avec l'id : "
-                                + experienceId));
+                experience.setCompany(request.getCompany());
+                experience.setPosition(request.getPosition());
+                experience.setLocation(request.getLocation());
+                experience.setStartDate(request.getStartDate());
+                experience.setEndDate(request.getEndDate());
+                experience.setCurrent(request.isCurrent());
+                experience.setDescription(request.getDescription());
 
-        experience.setCompany(request.getCompany());
-        experience.setPosition(request.getPosition());
-        experience.setLocation(request.getLocation());
-        experience.setStartDate(request.getStartDate());
-        experience.setEndDate(request.getEndDate());
-        experience.setCurrent(request.isCurrent());
-        experience.setDescription(request.getDescription());
+                return new ExperienceResponse(
+                                experienceRepository.save(experience));
+        }
 
-        Experience updated = experienceRepository.save(experience);
+        public void delete(
+                        Long cvId,
+                        Long experienceId,
+                        String userId) {
 
-        return new ExperienceResponse(updated);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // DELETE
-    // ============================================================
+                Experience experience = experienceRepository
+                                .findByIdAndCvId(
+                                                experienceId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Expérience introuvable avec l'id : "
+                                                                + experienceId));
 
-    public void delete(
-            Long cvId,
-            Long experienceId) {
-
-        Experience experience = experienceRepository
-                .findByIdAndCvId(
-                        experienceId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Expérience introuvable avec l'id : "
-                                + experienceId));
-
-        experienceRepository.delete(experience);
-    }
+                experienceRepository.delete(experience);
+        }
 }

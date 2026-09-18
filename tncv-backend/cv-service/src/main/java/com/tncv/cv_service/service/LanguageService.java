@@ -14,119 +14,115 @@ import java.util.List;
 @Service
 public class LanguageService {
 
-    private final LanguageRepository languageRepository;
-    private final CvRepository cvRepository;
+        private final LanguageRepository languageRepository;
+        private final CvRepository cvRepository;
 
-    public LanguageService(
-            LanguageRepository languageRepository,
-            CvRepository cvRepository) {
+        public LanguageService(
+                        LanguageRepository languageRepository,
+                        CvRepository cvRepository) {
 
-        this.languageRepository = languageRepository;
-        this.cvRepository = cvRepository;
-    }
+                this.languageRepository = languageRepository;
+                this.cvRepository = cvRepository;
+        }
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+        private Cv getOwnedCv(Long cvId, String userId) {
 
-    public LanguageResponse create(
-            Long cvId,
-            LanguageRequest request) {
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+        public LanguageResponse create(
+                        Long cvId,
+                        String userId,
+                        LanguageRequest request) {
 
-        Language language = new Language();
+                Cv cv = getOwnedCv(cvId, userId);
 
-        language.setName(request.getName());
-        language.setLevel(request.getLevel());
-        language.setCertification(request.getCertification());
-        language.setDescription(request.getDescription());
+                Language language = new Language();
 
-        language.setCv(cv);
+                language.setName(request.getName());
+                language.setLevel(request.getLevel());
+                language.setCertification(request.getCertification());
+                language.setDescription(request.getDescription());
+                language.setCv(cv);
 
-        Language savedLanguage = languageRepository.save(language);
+                return new LanguageResponse(
+                                languageRepository.save(language));
+        }
 
-        return new LanguageResponse(savedLanguage);
-    }
+        public List<LanguageResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public List<LanguageResponse> getByCv(Long cvId) {
+                return languageRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(LanguageResponse::new)
+                                .toList();
+        }
 
-        return languageRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(LanguageResponse::new)
-                .toList();
-    }
+        public LanguageResponse get(
+                        Long cvId,
+                        Long languageId,
+                        String userId) {
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public LanguageResponse get(
-            Long cvId,
-            Long languageId) {
+                Language language = languageRepository
+                                .findByIdAndCvId(
+                                                languageId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Langue introuvable avec l'id : "
+                                                                + languageId));
 
-        Language language = languageRepository
-                .findByIdAndCvId(
-                        languageId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Langue introuvable avec l'id : "
-                                + languageId));
+                return new LanguageResponse(language);
+        }
 
-        return new LanguageResponse(language);
-    }
+        public LanguageResponse update(
+                        Long cvId,
+                        Long languageId,
+                        String userId,
+                        LanguageRequest request) {
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public LanguageResponse update(
-            Long cvId,
-            Long languageId,
-            LanguageRequest request) {
+                Language language = languageRepository
+                                .findByIdAndCvId(
+                                                languageId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Langue introuvable avec l'id : "
+                                                                + languageId));
 
-        Language language = languageRepository
-                .findByIdAndCvId(
-                        languageId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Langue introuvable avec l'id : "
-                                + languageId));
+                language.setName(request.getName());
+                language.setLevel(request.getLevel());
+                language.setCertification(request.getCertification());
+                language.setDescription(request.getDescription());
 
-        language.setName(request.getName());
-        language.setLevel(request.getLevel());
-        language.setCertification(request.getCertification());
-        language.setDescription(request.getDescription());
+                return new LanguageResponse(
+                                languageRepository.save(language));
+        }
 
-        Language updatedLanguage = languageRepository.save(language);
+        public void delete(
+                        Long cvId,
+                        Long languageId,
+                        String userId) {
 
-        return new LanguageResponse(updatedLanguage);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // DELETE
-    // ============================================================
+                Language language = languageRepository
+                                .findByIdAndCvId(
+                                                languageId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Langue introuvable avec l'id : "
+                                                                + languageId));
 
-    public void delete(
-            Long cvId,
-            Long languageId) {
-
-        Language language = languageRepository
-                .findByIdAndCvId(
-                        languageId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Langue introuvable avec l'id : "
-                                + languageId));
-
-        languageRepository.delete(language);
-    }
+                languageRepository.delete(language);
+        }
 }

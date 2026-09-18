@@ -14,117 +14,113 @@ import java.util.List;
 @Service
 public class InterestService {
 
-    private final InterestRepository interestRepository;
-    private final CvRepository cvRepository;
+        private final InterestRepository interestRepository;
+        private final CvRepository cvRepository;
 
-    public InterestService(
-            InterestRepository interestRepository,
-            CvRepository cvRepository) {
+        public InterestService(
+                        InterestRepository interestRepository,
+                        CvRepository cvRepository) {
 
-        this.interestRepository = interestRepository;
-        this.cvRepository = cvRepository;
-    }
+                this.interestRepository = interestRepository;
+                this.cvRepository = cvRepository;
+        }
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+        private Cv getOwnedCv(Long cvId, String userId) {
 
-    public InterestResponse create(
-            Long cvId,
-            InterestRequest request) {
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+        public InterestResponse create(
+                        Long cvId,
+                        String userId,
+                        InterestRequest request) {
 
-        Interest interest = new Interest();
+                Cv cv = getOwnedCv(cvId, userId);
 
-        interest.setName(request.getName());
-        interest.setCategory(request.getCategory());
-        interest.setDescription(request.getDescription());
+                Interest interest = new Interest();
 
-        interest.setCv(cv);
+                interest.setName(request.getName());
+                interest.setCategory(request.getCategory());
+                interest.setDescription(request.getDescription());
+                interest.setCv(cv);
 
-        Interest savedInterest = interestRepository.save(interest);
+                return new InterestResponse(
+                                interestRepository.save(interest));
+        }
 
-        return new InterestResponse(savedInterest);
-    }
+        public List<InterestResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public List<InterestResponse> getByCv(Long cvId) {
+                return interestRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(InterestResponse::new)
+                                .toList();
+        }
 
-        return interestRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(InterestResponse::new)
-                .toList();
-    }
+        public InterestResponse get(
+                        Long cvId,
+                        Long interestId,
+                        String userId) {
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public InterestResponse get(
-            Long cvId,
-            Long interestId) {
+                Interest interest = interestRepository
+                                .findByIdAndCvId(
+                                                interestId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Centre d'intérêt introuvable avec l'id : "
+                                                                + interestId));
 
-        Interest interest = interestRepository
-                .findByIdAndCvId(
-                        interestId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Centre d'intérêt introuvable avec l'id : "
-                                + interestId));
+                return new InterestResponse(interest);
+        }
 
-        return new InterestResponse(interest);
-    }
+        public InterestResponse update(
+                        Long cvId,
+                        Long interestId,
+                        String userId,
+                        InterestRequest request) {
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public InterestResponse update(
-            Long cvId,
-            Long interestId,
-            InterestRequest request) {
+                Interest interest = interestRepository
+                                .findByIdAndCvId(
+                                                interestId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Centre d'intérêt introuvable avec l'id : "
+                                                                + interestId));
 
-        Interest interest = interestRepository
-                .findByIdAndCvId(
-                        interestId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Centre d'intérêt introuvable avec l'id : "
-                                + interestId));
+                interest.setName(request.getName());
+                interest.setCategory(request.getCategory());
+                interest.setDescription(request.getDescription());
 
-        interest.setName(request.getName());
-        interest.setCategory(request.getCategory());
-        interest.setDescription(request.getDescription());
+                return new InterestResponse(
+                                interestRepository.save(interest));
+        }
 
-        Interest updatedInterest = interestRepository.save(interest);
+        public void delete(
+                        Long cvId,
+                        Long interestId,
+                        String userId) {
 
-        return new InterestResponse(updatedInterest);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // DELETE
-    // ============================================================
+                Interest interest = interestRepository
+                                .findByIdAndCvId(
+                                                interestId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Centre d'intérêt introuvable avec l'id : "
+                                                                + interestId));
 
-    public void delete(
-            Long cvId,
-            Long interestId) {
-
-        Interest interest = interestRepository
-                .findByIdAndCvId(
-                        interestId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Centre d'intérêt introuvable avec l'id : "
-                                + interestId));
-
-        interestRepository.delete(interest);
-    }
+                interestRepository.delete(interest);
+        }
 }

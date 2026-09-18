@@ -4,6 +4,7 @@ import com.tncv.cv_service.dto.SkillRequest;
 import com.tncv.cv_service.dto.SkillResponse;
 import com.tncv.cv_service.entity.Cv;
 import com.tncv.cv_service.entity.Skill;
+import com.tncv.cv_service.exception.ResourceNotFoundException;
 import com.tncv.cv_service.repository.CvRepository;
 import com.tncv.cv_service.repository.SkillRepository;
 import org.springframework.stereotype.Service;
@@ -19,15 +20,31 @@ public class SkillService {
     public SkillService(
             SkillRepository skillRepository,
             CvRepository cvRepository) {
+
         this.skillRepository = skillRepository;
         this.cvRepository = cvRepository;
     }
 
-    // CREATE
-    public SkillResponse create(Long cvId, SkillRequest request) {
+    private Cv getOwnedCv(
+            Long cvId,
+            String userId) {
 
-        Cv cv = cvRepository.findById(cvId)
-                .orElseThrow(() -> new RuntimeException("CV introuvable avec l'id : " + cvId));
+        return cvRepository
+                .findByIdAndUserId(cvId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "CV introuvable avec l'id : " + cvId));
+    }
+
+    // ============================================================
+    // CREATE
+    // ============================================================
+
+    public SkillResponse create(
+            Long cvId,
+            String userId,
+            SkillRequest request) {
+
+        Cv cv = getOwnedCv(cvId, userId);
 
         Skill skill = new Skill();
 
@@ -42,36 +59,64 @@ public class SkillService {
         return new SkillResponse(savedSkill);
     }
 
+    // ============================================================
     // GET ALL
-    public List<SkillResponse> getByCv(Long cvId) {
+    // ============================================================
 
-        return skillRepository.findByCvId(cvId)
+    public List<SkillResponse> getByCv(
+            Long cvId,
+            String userId) {
+
+        getOwnedCv(cvId, userId);
+
+        return skillRepository
+                .findByCvId(cvId)
                 .stream()
                 .map(SkillResponse::new)
                 .toList();
     }
 
+    // ============================================================
     // GET ONE
-    public SkillResponse get(Long cvId, Long skillId) {
+    // ============================================================
+
+    public SkillResponse get(
+            Long cvId,
+            Long skillId,
+            String userId) {
+
+        getOwnedCv(cvId, userId);
 
         Skill skill = skillRepository
-                .findByIdAndCvId(skillId, cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Compétence introuvable avec l'id : " + skillId));
+                .findByIdAndCvId(
+                        skillId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Compétence introuvable avec l'id : "
+                                + skillId));
 
         return new SkillResponse(skill);
     }
 
+    // ============================================================
     // UPDATE
+    // ============================================================
+
     public SkillResponse update(
             Long cvId,
             Long skillId,
+            String userId,
             SkillRequest request) {
 
+        getOwnedCv(cvId, userId);
+
         Skill skill = skillRepository
-                .findByIdAndCvId(skillId, cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Compétence introuvable avec l'id : " + skillId));
+                .findByIdAndCvId(
+                        skillId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Compétence introuvable avec l'id : "
+                                + skillId));
 
         skill.setName(request.getName());
         skill.setCategory(request.getCategory());
@@ -83,13 +128,24 @@ public class SkillService {
         return new SkillResponse(updatedSkill);
     }
 
+    // ============================================================
     // DELETE
-    public void delete(Long cvId, Long skillId) {
+    // ============================================================
+
+    public void delete(
+            Long cvId,
+            Long skillId,
+            String userId) {
+
+        getOwnedCv(cvId, userId);
 
         Skill skill = skillRepository
-                .findByIdAndCvId(skillId, cvId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Compétence introuvable avec l'id : " + skillId));
+                .findByIdAndCvId(
+                        skillId,
+                        cvId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Compétence introuvable avec l'id : "
+                                + skillId));
 
         skillRepository.delete(skill);
     }

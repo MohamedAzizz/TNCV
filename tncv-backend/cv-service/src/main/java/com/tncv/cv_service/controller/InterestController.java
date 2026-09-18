@@ -4,7 +4,9 @@ import com.tncv.cv_service.dto.InterestRequest;
 import com.tncv.cv_service.dto.InterestResponse;
 import com.tncv.cv_service.service.InterestService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,70 +15,88 @@ import java.util.List;
 @RequestMapping("/api/cvs/{cvId}/interests")
 public class InterestController {
 
-    private final InterestService interestService;
+        private final InterestService interestService;
 
-    public InterestController(
-            InterestService interestService) {
-        this.interestService = interestService;
-    }
+        public InterestController(InterestService interestService) {
+                this.interestService = interestService;
+        }
 
-    // CREATE
-    @PostMapping
-    public ResponseEntity<InterestResponse> create(
-            @PathVariable Long cvId,
-            @Valid @RequestBody InterestRequest request) {
+        @PostMapping
+        public ResponseEntity<InterestResponse> create(
+                        @PathVariable Long cvId,
+                        Authentication authentication,
+                        @Valid @RequestBody InterestRequest request) {
 
-        return ResponseEntity.ok(
-                interestService.create(
-                        cvId,
-                        request));
-    }
+                String userId = authentication.getName();
 
-    // GET ALL
-    @GetMapping
-    public ResponseEntity<List<InterestResponse>> getAll(
-            @PathVariable Long cvId) {
+                InterestResponse response = interestService.create(
+                                cvId,
+                                userId,
+                                request);
 
-        return ResponseEntity.ok(
-                interestService.getByCv(cvId));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    // GET ONE
-    @GetMapping("/{interestId}")
-    public ResponseEntity<InterestResponse> get(
-            @PathVariable Long cvId,
-            @PathVariable Long interestId) {
+        @GetMapping
+        public ResponseEntity<List<InterestResponse>> getAll(
+                        @PathVariable Long cvId,
+                        Authentication authentication) {
 
-        return ResponseEntity.ok(
-                interestService.get(
-                        cvId,
-                        interestId));
-    }
+                String userId = authentication.getName();
 
-    // UPDATE
-    @PutMapping("/{interestId}")
-    public ResponseEntity<InterestResponse> update(
-            @PathVariable Long cvId,
-            @PathVariable Long interestId,
-            @Valid @RequestBody InterestRequest request) {
+                return ResponseEntity.ok(
+                                interestService.getByCv(
+                                                cvId,
+                                                userId));
+        }
 
-        return ResponseEntity.ok(
-                interestService.update(
-                        cvId,
-                        interestId,
-                        request));
-    }
+        @GetMapping("/{interestId}")
+        public ResponseEntity<InterestResponse> get(
+                        @PathVariable Long cvId,
+                        @PathVariable Long interestId,
+                        Authentication authentication) {
 
-    // DELETE
-    @DeleteMapping("/{interestId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable Long cvId,
-            @PathVariable Long interestId) {
+                String userId = authentication.getName();
 
-        interestService.delete(
-                cvId,
-                interestId);
+                return ResponseEntity.ok(
+                                interestService.get(
+                                                cvId,
+                                                interestId,
+                                                userId));
+        }
 
-        return ResponseEntity.noContent().build();
-    }
+        @PutMapping("/{interestId}")
+        public ResponseEntity<InterestResponse> update(
+                        @PathVariable Long cvId,
+                        @PathVariable Long interestId,
+                        Authentication authentication,
+                        @Valid @RequestBody InterestRequest request) {
+
+                String userId = authentication.getName();
+
+                return ResponseEntity.ok(
+                                interestService.update(
+                                                cvId,
+                                                interestId,
+                                                userId,
+                                                request));
+        }
+
+        @DeleteMapping("/{interestId}")
+        public ResponseEntity<Void> delete(
+                        @PathVariable Long cvId,
+                        @PathVariable Long interestId,
+                        Authentication authentication) {
+
+                String userId = authentication.getName();
+
+                interestService.delete(
+                                cvId,
+                                interestId,
+                                userId);
+
+                return ResponseEntity.noContent().build();
+        }
 }

@@ -14,127 +14,123 @@ import java.util.List;
 @Service
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
-    private final CvRepository cvRepository;
+        private final ProjectRepository projectRepository;
+        private final CvRepository cvRepository;
 
-    public ProjectService(
-            ProjectRepository projectRepository,
-            CvRepository cvRepository) {
+        public ProjectService(
+                        ProjectRepository projectRepository,
+                        CvRepository cvRepository) {
 
-        this.projectRepository = projectRepository;
-        this.cvRepository = cvRepository;
-    }
+                this.projectRepository = projectRepository;
+                this.cvRepository = cvRepository;
+        }
 
-    // ============================================================
-    // CREATE
-    // ============================================================
+        private Cv getOwnedCv(Long cvId, String userId) {
 
-    public ProjectResponse create(
-            Long cvId,
-            ProjectRequest request) {
+                return cvRepository
+                                .findByIdAndUserId(cvId, userId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "CV introuvable avec l'id : " + cvId));
+        }
 
-        Cv cv = cvRepository
-                .findById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "CV introuvable avec l'id : " + cvId));
+        public ProjectResponse create(
+                        Long cvId,
+                        String userId,
+                        ProjectRequest request) {
 
-        Project project = new Project();
+                Cv cv = getOwnedCv(cvId, userId);
 
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        project.setTechnologies(request.getTechnologies());
-        project.setStartDate(request.getStartDate());
-        project.setEndDate(request.getEndDate());
-        project.setCurrent(request.isCurrent());
-        project.setGithubUrl(request.getGithubUrl());
-        project.setProjectUrl(request.getProjectUrl());
+                Project project = new Project();
 
-        project.setCv(cv);
+                project.setName(request.getName());
+                project.setDescription(request.getDescription());
+                project.setTechnologies(request.getTechnologies());
+                project.setStartDate(request.getStartDate());
+                project.setEndDate(request.getEndDate());
+                project.setCurrent(request.isCurrent());
+                project.setGithubUrl(request.getGithubUrl());
+                project.setProjectUrl(request.getProjectUrl());
+                project.setCv(cv);
 
-        Project savedProject = projectRepository.save(project);
+                return new ProjectResponse(
+                                projectRepository.save(project));
+        }
 
-        return new ProjectResponse(savedProject);
-    }
+        public List<ProjectResponse> getByCv(
+                        Long cvId,
+                        String userId) {
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public List<ProjectResponse> getByCv(Long cvId) {
+                return projectRepository
+                                .findByCvId(cvId)
+                                .stream()
+                                .map(ProjectResponse::new)
+                                .toList();
+        }
 
-        return projectRepository
-                .findByCvId(cvId)
-                .stream()
-                .map(ProjectResponse::new)
-                .toList();
-    }
+        public ProjectResponse get(
+                        Long cvId,
+                        Long projectId,
+                        String userId) {
 
-    // ============================================================
-    // GET ONE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public ProjectResponse get(
-            Long cvId,
-            Long projectId) {
+                Project project = projectRepository
+                                .findByIdAndCvId(
+                                                projectId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Projet introuvable avec l'id : "
+                                                                + projectId));
 
-        Project project = projectRepository
-                .findByIdAndCvId(
-                        projectId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Projet introuvable avec l'id : "
-                                + projectId));
+                return new ProjectResponse(project);
+        }
 
-        return new ProjectResponse(project);
-    }
+        public ProjectResponse update(
+                        Long cvId,
+                        Long projectId,
+                        String userId,
+                        ProjectRequest request) {
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
+                getOwnedCv(cvId, userId);
 
-    public ProjectResponse update(
-            Long cvId,
-            Long projectId,
-            ProjectRequest request) {
+                Project project = projectRepository
+                                .findByIdAndCvId(
+                                                projectId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Projet introuvable avec l'id : "
+                                                                + projectId));
 
-        Project project = projectRepository
-                .findByIdAndCvId(
-                        projectId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Projet introuvable avec l'id : "
-                                + projectId));
+                project.setName(request.getName());
+                project.setDescription(request.getDescription());
+                project.setTechnologies(request.getTechnologies());
+                project.setStartDate(request.getStartDate());
+                project.setEndDate(request.getEndDate());
+                project.setCurrent(request.isCurrent());
+                project.setGithubUrl(request.getGithubUrl());
+                project.setProjectUrl(request.getProjectUrl());
 
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        project.setTechnologies(request.getTechnologies());
-        project.setStartDate(request.getStartDate());
-        project.setEndDate(request.getEndDate());
-        project.setCurrent(request.isCurrent());
-        project.setGithubUrl(request.getGithubUrl());
-        project.setProjectUrl(request.getProjectUrl());
+                return new ProjectResponse(
+                                projectRepository.save(project));
+        }
 
-        Project updatedProject = projectRepository.save(project);
+        public void delete(
+                        Long cvId,
+                        Long projectId,
+                        String userId) {
 
-        return new ProjectResponse(updatedProject);
-    }
+                getOwnedCv(cvId, userId);
 
-    // ============================================================
-    // DELETE
-    // ============================================================
+                Project project = projectRepository
+                                .findByIdAndCvId(
+                                                projectId,
+                                                cvId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Projet introuvable avec l'id : "
+                                                                + projectId));
 
-    public void delete(
-            Long cvId,
-            Long projectId) {
-
-        Project project = projectRepository
-                .findByIdAndCvId(
-                        projectId,
-                        cvId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Projet introuvable avec l'id : "
-                                + projectId));
-
-        projectRepository.delete(project);
-    }
+                projectRepository.delete(project);
+        }
 }

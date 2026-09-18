@@ -6,6 +6,7 @@ import com.tncv.cv_service.service.ExperienceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,66 +15,89 @@ import java.util.List;
 @RequestMapping("/api/cvs/{cvId}/experiences")
 public class ExperienceController {
 
-    private final ExperienceService experienceService;
+        private final ExperienceService experienceService;
 
-    public ExperienceController(
-            ExperienceService experienceService) {
-        this.experienceService = experienceService;
-    }
+        public ExperienceController(
+                        ExperienceService experienceService) {
+                this.experienceService = experienceService;
+        }
 
-    @PostMapping
-    public ResponseEntity<ExperienceResponse> create(
-            @PathVariable Long cvId,
-            @Valid @RequestBody ExperienceRequest request) {
+        @PostMapping
+        public ResponseEntity<ExperienceResponse> create(
+                        @PathVariable Long cvId,
+                        Authentication authentication,
+                        @Valid @RequestBody ExperienceRequest request) {
 
-        ExperienceResponse response = experienceService.create(cvId, request);
+                String userId = authentication.getName();
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+                ExperienceResponse response = experienceService.create(
+                                cvId,
+                                userId,
+                                request);
 
-    @GetMapping
-    public ResponseEntity<List<ExperienceResponse>> getAll(
-            @PathVariable Long cvId) {
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-        return ResponseEntity.ok(
-                experienceService.getByCv(cvId));
-    }
+        @GetMapping
+        public ResponseEntity<List<ExperienceResponse>> getAll(
+                        @PathVariable Long cvId,
+                        Authentication authentication) {
 
-    @GetMapping("/{experienceId}")
-    public ResponseEntity<ExperienceResponse> get(
-            @PathVariable Long cvId,
-            @PathVariable Long experienceId) {
+                String userId = authentication.getName();
 
-        return ResponseEntity.ok(
-                experienceService.get(
-                        cvId,
-                        experienceId));
-    }
+                return ResponseEntity.ok(
+                                experienceService.getByCv(
+                                                cvId,
+                                                userId));
+        }
 
-    @PutMapping("/{experienceId}")
-    public ResponseEntity<ExperienceResponse> update(
-            @PathVariable Long cvId,
-            @PathVariable Long experienceId,
-            @Valid @RequestBody ExperienceRequest request) {
+        @GetMapping("/{experienceId}")
+        public ResponseEntity<ExperienceResponse> get(
+                        @PathVariable Long cvId,
+                        @PathVariable Long experienceId,
+                        Authentication authentication) {
 
-        return ResponseEntity.ok(
-                experienceService.update(
-                        cvId,
-                        experienceId,
-                        request));
-    }
+                String userId = authentication.getName();
 
-    @DeleteMapping("/{experienceId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable Long cvId,
-            @PathVariable Long experienceId) {
+                return ResponseEntity.ok(
+                                experienceService.get(
+                                                cvId,
+                                                experienceId,
+                                                userId));
+        }
 
-        experienceService.delete(
-                cvId,
-                experienceId);
+        @PutMapping("/{experienceId}")
+        public ResponseEntity<ExperienceResponse> update(
+                        @PathVariable Long cvId,
+                        @PathVariable Long experienceId,
+                        Authentication authentication,
+                        @Valid @RequestBody ExperienceRequest request) {
 
-        return ResponseEntity.noContent().build();
-    }
+                String userId = authentication.getName();
+
+                return ResponseEntity.ok(
+                                experienceService.update(
+                                                cvId,
+                                                experienceId,
+                                                userId,
+                                                request));
+        }
+
+        @DeleteMapping("/{experienceId}")
+        public ResponseEntity<Void> delete(
+                        @PathVariable Long cvId,
+                        @PathVariable Long experienceId,
+                        Authentication authentication) {
+
+                String userId = authentication.getName();
+
+                experienceService.delete(
+                                cvId,
+                                experienceId,
+                                userId);
+
+                return ResponseEntity.noContent().build();
+        }
 }

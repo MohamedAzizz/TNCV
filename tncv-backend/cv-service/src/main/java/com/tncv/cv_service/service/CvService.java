@@ -22,7 +22,9 @@ public class CvService {
     // CREATE
     // ============================================================
 
-    public CvResponse createCv(String userId, CvRequest request) {
+    public CvResponse createCv(
+            String userId,
+            CvRequest request) {
 
         Cv cv = new Cv();
 
@@ -45,9 +47,11 @@ public class CvService {
     // GET ALL USER CVS
     // ============================================================
 
-    public List<CvResponse> getUserCvs(String userId) {
+    public List<CvResponse> getUserCvs(
+            String userId) {
 
-        return cvRepository.findByUserId(userId)
+        return cvRepository
+                .findByUserId(userId)
                 .stream()
                 .map(CvResponse::new)
                 .toList();
@@ -57,9 +61,12 @@ public class CvService {
     // GET ONE CV
     // ============================================================
 
-    public CvResponse getCv(Long id, String userId) {
+    public CvResponse getCv(
+            Long id,
+            String userId) {
 
-        Cv cv = cvRepository.findByIdAndUserId(id, userId)
+        Cv cv = cvRepository
+                .findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + id));
 
@@ -75,7 +82,8 @@ public class CvService {
             String userId,
             CvRequest request) {
 
-        Cv cv = cvRepository.findByIdAndUserId(id, userId)
+        Cv cv = cvRepository
+                .findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + id));
 
@@ -97,9 +105,12 @@ public class CvService {
     // DELETE
     // ============================================================
 
-    public void deleteCv(Long id, String userId) {
+    public void deleteCv(
+            Long id,
+            String userId) {
 
-        Cv cv = cvRepository.findByIdAndUserId(id, userId)
+        Cv cv = cvRepository
+                .findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "CV introuvable avec l'id : " + id));
 
