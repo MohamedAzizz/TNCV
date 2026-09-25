@@ -1,22 +1,27 @@
-import type { AuthUser } from "../types/auth";
-
 const TOKEN_KEY = "tncv_access_token";
 const USER_KEY = "tncv_user";
 
 export const storage = {
-  getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
-  },
-
-  setToken(token: string): void {
+  setToken(token: string) {
     localStorage.setItem(TOKEN_KEY, token);
   },
 
-  removeToken(): void {
+  getToken() {
+    return localStorage.getItem(TOKEN_KEY);
+  },
+
+  removeToken() {
     localStorage.removeItem(TOKEN_KEY);
   },
 
-  getUser(): AuthUser | null {
+  setUser(user: unknown) {
+    localStorage.setItem(
+      USER_KEY,
+      JSON.stringify(user)
+    );
+  },
+
+  getUser<T>() {
     const user = localStorage.getItem(USER_KEY);
 
     if (!user) {
@@ -24,21 +29,17 @@ export const storage = {
     }
 
     try {
-      return JSON.parse(user);
+      return JSON.parse(user) as T;
     } catch {
       return null;
     }
   },
 
-  setUser(user: AuthUser): void {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  },
-
-  removeUser(): void {
+  removeUser() {
     localStorage.removeItem(USER_KEY);
   },
 
-  clear(): void {
+  clear() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   },

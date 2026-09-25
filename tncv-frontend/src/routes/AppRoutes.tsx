@@ -13,10 +13,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import VerifyCode from "../pages/auth/VerifyCode";
 
-import DashboardLayout from "../components/layout/DashboardLayout";
-
 import Dashboard from "../pages/dashboard/Dashboard";
-
 import CvList from "../pages/cv/CvList";
 import CvCreate from "../pages/cv/CvCreate";
 import CvEdit from "../pages/cv/CvEdit";
@@ -25,10 +22,7 @@ import CvDetails from "../pages/cv/CvDetails";
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* ============================= */}
-      {/* PUBLIC ROUTES */}
-      {/* ============================= */}
-
+      {/* Public */}
       <Route element={<PublicRoute />}>
         <Route
           path="/signin"
@@ -56,45 +50,35 @@ const AppRoutes = () => {
         />
       </Route>
 
-      {/* ============================= */}
-      {/* PROTECTED ROUTES */}
-      {/* ============================= */}
-
+      {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route
-          element={<DashboardLayout />}
-        >
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
+          path="/dashboard"
+          element={<Dashboard />}
+        />
 
-          <Route
-            path="/cvs"
-            element={<CvList />}
-          />
+        <Route
+          path="/cvs"
+          element={<CvList />}
+        />
 
-          <Route
-            path="/cvs/create"
-            element={<CvCreate />}
-          />
+        <Route
+          path="/cvs/create"
+          element={<CvCreate />}
+        />
 
-          <Route
-            path="/cvs/:id"
-            element={<CvDetails />}
-          />
+        <Route
+          path="/cvs/:id"
+          element={<CvDetails />}
+        />
 
-          <Route
-            path="/cvs/:id/edit"
-            element={<CvEdit />}
-          />
-        </Route>
+        <Route
+          path="/cvs/:id/edit"
+          element={<CvEdit />}
+        />
       </Route>
 
-      {/* ============================= */}
-      {/* DEFAULT */}
-      {/* ============================= */}
-
+      {/* Default */}
       <Route
         path="/"
         element={

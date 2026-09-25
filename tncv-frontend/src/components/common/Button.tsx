@@ -1,7 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   loading?: boolean;
 }
@@ -10,29 +9,34 @@ const Button = ({
   children,
   loading = false,
   disabled,
+  className = "",
   ...props
 }: ButtonProps) => {
   return (
     <button
-      {...props}
       disabled={disabled || loading}
-      className="
-        w-full
-        rounded-xl
-        px-4
-        py-3
-        font-semibold
-        text-white
-        transition-all
-        duration-200
-        hover:opacity-90
-        active:scale-[0.98]
+      className={`
+        flex w-full items-center justify-center gap-2
+        rounded-xl px-5 py-3.5
+        text-sm font-semibold text-white
+        transition-all duration-200
+        bg-[#79B947]
+        hover:bg-[#68a83a]
+        hover:shadow-lg hover:shadow-[#79B947]/20
+        active:scale-[0.99]
         disabled:cursor-not-allowed
         disabled:opacity-60
-      "
-      style={{ backgroundColor: "#79B947" }}
+        ${className}
+      `}
+      {...props}
     >
-      {loading ? "Chargement..." : children}
+      {loading && (
+        <span
+          className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+        />
+      )}
+
+      {children}
     </button>
   );
 };

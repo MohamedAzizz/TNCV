@@ -1,5 +1,9 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import {
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 
 const PublicRoute = () => {
   const {
@@ -9,8 +13,8 @@ const PublicRoute = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        Chargement...
+      <div className="flex min-h-screen items-center justify-center bg-[#f8faf6]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#79B947]" />
       </div>
     );
   }

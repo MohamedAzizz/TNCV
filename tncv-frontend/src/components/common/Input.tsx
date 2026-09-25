@@ -1,50 +1,49 @@
-import type {
-  InputHTMLAttributes,
-} from "react";
+import type { InputHTMLAttributes } from "react";
 
-interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
   error?: string;
 }
 
 const Input = ({
   label,
   error,
+  className = "",
   id,
   ...props
 }: InputProps) => {
   return (
-    <div className="space-y-2">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-slate-700"
-      >
-        {label}
-      </label>
+    <div className="w-full">
+      {label && (
+        <label
+          htmlFor={id}
+          className="mb-2 block text-sm font-medium text-[#131B2E]"
+        >
+          {label}
+        </label>
+      )}
 
       <input
         id={id}
-        {...props}
-        className="
-          w-full
-          rounded-xl
-          border
-          border-slate-200
-          bg-white
-          px-4
-          py-3
-          text-sm
-          outline-none
-          transition
+        className={`
+          w-full rounded-xl border bg-white px-4 py-3
+          text-sm text-[#131B2E]
+          outline-none transition
+          placeholder:text-slate-400
           focus:border-[#79B947]
-          focus:ring-2
-          focus:ring-[#79B947]/20
-        "
+          focus:ring-4 focus:ring-[#79B947]/10
+          ${
+            error
+              ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+              : "border-slate-200"
+          }
+          ${className}
+        `}
+        {...props}
       />
 
       {error && (
-        <p className="text-xs text-red-500">
+        <p className="mt-1.5 text-xs text-red-500">
           {error}
         </p>
       )}

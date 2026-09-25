@@ -1,12 +1,13 @@
 import {
   createContext,
+  useContext,
   useEffect,
   useState,
   type ReactNode,
 } from "react";
 
-import { authService } from "../services/authService";
-import { userService } from "../services/userService";
+import authService from "../services/authService";
+import api from "../services/api";
 import { storage } from "../utils/storage";
 
 import type {
@@ -17,24 +18,24 @@ import type {
 
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   loading: boolean;
   isAuthenticated: boolean;
 
-  login: (data: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
+  login: (
+    data: LoginRequest
+  ) => Promise<void>;
+
+  register: (
+    data: RegisterRequest
+  ) => Promise<void>;
+
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  token: null,
-  loading: true,
-  isAuthenticated: false,
-  login: async () => {},
-  register: async () => {},
-  logout: () => {},
-});
+const AuthContext =
+  createContext<AuthContextType | undefined>(
+    undefined
+  );
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -43,42 +44,34 @@ interface AuthProviderProps {
 export const AuthProvider = ({
   children,
 }: AuthProviderProps) => {
-  const [user, setUser] = useState<AuthUser | null>(
-    storage.getUser()
-  );
+  const [user, setUser] =
+    useState<AuthUser | null>(
+      storage.getUser<AuthUser>()
+    );
 
-  const [token, setToken] = useState<string | null>(
-    storage.getToken()
-  );
-
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     const restoreSession = async () => {
-      const savedToken = storage.getToken();
+      const token = storage.getToken();
 
-      if (!savedToken) {
+      if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const profile = await userService.getMe();
+        const response =
+          await api.get<AuthUser>(
+            "/api/users/me"
+          );
 
-        const authUser: AuthUser = {
-          id: profile.keycloakUserId,
-          username: profile.username,
-          email: profile.email,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-        };
-
-        setUser(authUser);
-        storage.setUser(authUser);
+        setUser(response.data);
+        storage.setUser(response.data);
       } catch {
         storage.clear();
         setUser(null);
-        setToken(null);
       } finally {
         setLoading(false);
       }
@@ -87,45 +80,42 @@ export const AuthProvider = ({
     restoreSession();
   }, []);
 
-  const login = async (data: LoginRequest) => {
-    const response = await authService.login(data);
+  const login = async (
+    data: LoginRequest
+  ) => {
+    const response =
+      await authService.login(data);
 
-    storage.setToken(response.accessToken);
-    setToken(response.accessToken);
+    storage.setToken(
+      response.accessToken
+    );
 
-    const profile = await userService.getMe();
+    const userResponse =
+      await api.get<AuthUser>(
+        "/api/users/me"
+      );
 
-    const authUser: AuthUser = {
-      id: profile.keycloakUserId,
-      username: profile.username,
-      email: profile.email,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-    };
-
-    storage.setUser(authUser);
-    setUser(authUser);
+    setUser(userResponse.data);
+    storage.setUser(userResponse.data);
   };
 
-  const register = async (data: RegisterRequest) => {
+  const register = async (
+    data: RegisterRequest
+  ) => {
     await authService.register(data);
-
-    // Après inscription, l'utilisateur pourra se connecter.
   };
 
   const logout = () => {
     storage.clear();
     setUser(null);
-    setToken(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
         loading,
-        isAuthenticated: !!token,
+        isAuthenticated: !!user,
         login,
         register,
         logout,
@@ -134,4 +124,16 @@ export const AuthProvider = ({
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth doit être utilisé dans AuthProvider"
+    );
+  }
+
+  return context;
 };

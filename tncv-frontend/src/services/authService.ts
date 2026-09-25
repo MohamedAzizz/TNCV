@@ -5,8 +5,10 @@ import type {
   RegisterRequest,
 } from "../types/auth";
 
-export const authService = {
-  async login(data: LoginRequest): Promise<AuthResponse> {
+const authService = {
+  async login(
+    data: LoginRequest
+  ): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>(
       "/api/auth/login",
       data
@@ -15,8 +17,10 @@ export const authService = {
     return response.data;
   },
 
-  async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
+  async register(
+    data: RegisterRequest
+  ): Promise<AuthResponse | unknown> {
+    const response = await api.post(
       "/api/auth/register",
       data
     );
@@ -24,3 +28,5 @@ export const authService = {
     return response.data;
   },
 };
+
+export default authService;
