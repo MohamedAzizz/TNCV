@@ -1,6 +1,8 @@
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+/**
+ * Re-export du hook useAuth depuis AuthContext.
+ * Ce fichier existe pour la compatibilité avec les imports
+ * qui utilisent "hooks/useAuth" (ex: DashboardLayout).
+ *
+ * Source unique de vérité : context/AuthContext.tsx
+ */
+export { useAuth } from "../context/AuthContext";

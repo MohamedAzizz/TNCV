@@ -32,7 +32,7 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext =
+export const AuthContext =
   createContext<AuthContextType | undefined>(
     undefined
   );

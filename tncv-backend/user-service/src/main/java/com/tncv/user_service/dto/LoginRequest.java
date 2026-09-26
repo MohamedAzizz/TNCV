@@ -1,5 +1,6 @@
 package com.tncv.user_service.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginRequest {
 
-    @NotBlank(message = "Le username est obligatoire")
-    private String username;
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email est invalide")
+    private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
     private String password;

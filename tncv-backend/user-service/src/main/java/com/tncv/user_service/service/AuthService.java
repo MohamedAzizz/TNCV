@@ -7,7 +7,9 @@ import com.tncv.user_service.dto.UserResponse;
 import com.tncv.user_service.entity.UserProfile;
 import com.tncv.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -124,11 +126,24 @@ public class AuthService {
     // LOGIN
     // ============================================================
 
+    /**
+     * Le frontend envoie un email + mot de passe.
+     * On résout l'email en username (stocké en BDD) avant d'appeler Keycloak,
+     * car Keycloak authentifie par username dans ce realm.
+     */
     public LoginResponse login(
             LoginRequest request) {
 
+        // Résoudre le username à partir de l'email
+        UserProfile user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Identifiants incorrects"
+                ));
+
         return keycloakService.login(
-                request.getUsername(),
+                user.getUsername(),
                 request.getPassword()
         );
     }
