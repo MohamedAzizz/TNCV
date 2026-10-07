@@ -41,26 +41,36 @@ const CvList = () => {
   };
 
   return (
-    <div className="space-y-7">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">
-            Mes CV
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Gérez tous vos CV professionnels.
-          </p>
+    <div className="min-h-screen bg-[#f8faf6] p-6 lg:p-10">
+      <div className="mx-auto max-w-6xl space-y-7">
+        <div className="flex items-center gap-2 text-sm text-[#4d8225] font-semibold">
+          <Link
+            to="/dashboard"
+            className="hover:underline flex items-center gap-1"
+          >
+            ← Retour à l'accueil
+          </Link>
         </div>
 
-        <Link
-          to="/cvs/create"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#79B947] px-5 py-3 text-sm font-semibold text-white"
-        >
-          <Plus size={18} />
-          Nouveau CV
-        </Link>
-      </div>
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">
+              Mes CV
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Gérez tous vos CV professionnels.
+            </p>
+          </div>
+
+          <Link
+            to="/cvs/create"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#79B947] px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-[#6ba83d] transition-colors"
+          >
+            <Plus size={18} />
+            Nouveau CV
+          </Link>
+        </div>
 
       {loading ? (
         <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500">
@@ -134,6 +144,7 @@ const CvList = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };

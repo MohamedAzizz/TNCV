@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
@@ -86,18 +86,41 @@ const CvEdit = () => {
   };
 
   if (loading) {
-    return <p>Chargement...</p>;
+    return (
+      <div className="min-h-screen bg-[#f8faf6] p-10 flex items-center justify-center">
+        <p className="text-slate-500 font-medium">Chargement du CV...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h2 className="mb-7 text-2xl font-bold">
-        Modifier le CV
-      </h2>
+    <div className="min-h-screen bg-[#f8faf6] p-6 lg:p-10">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="flex items-center gap-3 text-sm font-semibold text-[#4d8225]">
+          <Link to="/dashboard" className="hover:underline">
+            ← Tableau de bord
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/cvs" className="hover:underline">
+            Mes CVs
+          </Link>
+          {id && (
+            <>
+              <span className="text-slate-300">•</span>
+              <Link to={`/cvs/${id}`} className="hover:underline">
+                Aperçu
+              </Link>
+            </>
+          )}
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
+        <h2 className="mb-7 text-2xl font-bold">
+          Modifier le CV
+        </h2>
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
       >
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <div className="grid gap-5 md:grid-cols-2">
@@ -210,6 +233,7 @@ const CvEdit = () => {
           </div>
         </div>
       </form>
+      </div>
     </div>
   );
 };

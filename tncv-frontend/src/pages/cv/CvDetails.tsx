@@ -43,12 +43,23 @@ const CvDetails = () => {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="mb-6 flex justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">
-            {cv.title}
-          </h2>
+    <div className="min-h-screen bg-[#f8faf6] p-6 lg:p-10">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="flex items-center gap-3 text-sm font-semibold text-[#4d8225]">
+          <Link to="/dashboard" className="hover:underline">
+            ← Tableau de bord
+          </Link>
+          <span className="text-slate-300">•</span>
+          <Link to="/cvs" className="hover:underline">
+            Mes CVs
+          </Link>
+        </div>
+
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">
+              {cv.title}
+            </h2>
 
           <p className="mt-1 text-slate-500">
             {cv.fullName}
@@ -87,6 +98,7 @@ const CvDetails = () => {
             {cv.summary || "Aucun résumé."}
           </p>
         </section>
+      </div>
       </div>
     </div>
   );

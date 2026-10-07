@@ -58,6 +58,11 @@ const AppRoutes = () => {
         />
 
         <Route
+          path="/accueil"
+          element={<Dashboard />}
+        />
+
+        <Route
           path="/cvs"
           element={<CvList />}
         />
@@ -83,7 +88,7 @@ const AppRoutes = () => {
         path="/"
         element={
           <Navigate
-            to="/signin"
+            to="/dashboard"
             replace
           />
         }
