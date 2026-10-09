@@ -2,8 +2,7 @@ services:
 
   # ==========================================
   # PostgreSQL - TNCV
-  # Script d'init : postgres/init/init.sql
-  # Crée tncv_user_db et tncv_cv_db
+  # Initialise tncv_user_db et tncv_cv_db
   # ==========================================
   postgres:
     image: postgres:17
@@ -24,9 +23,7 @@ services:
       retries: 5
 
   # ==========================================
-  # Keycloak
-  # Realm "tncv" doit être configuré manuellement
-  # ou importé via un fichier realm JSON
+  # Keycloak - Authentification & Autorisation
   # ==========================================
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -39,6 +36,137 @@ services:
       - "8181:8080"
     restart: unless-stopped
 
+  # ==========================================
+  # MinIO - Stockage Objets (Photos & CVs)
+  # ==========================================
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    container_name: tncv-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin123}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/bin/bash", "-c", "exec 3<>/dev/tcp/localhost/9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # MinIO Bucket Initialization
+  # Initialise automatiquement les buckets
+  # ==========================================
+  minio-init-buckets:
+    image: amazon/aws-cli:latest
+    container_name: tncv-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-admin}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-admin123}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+    entrypoint: >
+      /bin/sh -c "
+      aws --endpoint-url http://minio:9000 s3 mb s3://tncv-profile-images || true;
+      aws --endpoint-url http://minio:9000 s3 mb s3://tncv-cvs || true;
+      exit 0;
+      "
+
+  # ==========================================
+  # Eureka Discovery Server
+  # ==========================================
+  discovery-server:
+    build:
+      context: ./discovery-server
+    container_name: tncv-discovery-server
+    ports:
+      - "8761:8761"
+    restart: unless-stopped
+
+  # ==========================================
+  # User Service
+  # ==========================================
+  user-service:
+    build:
+      context: ./user-service
+    container_name: tncv-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-14373675}
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://keycloak:8080/realms/tncv}
+      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    restart: unless-stopped
+
+  # ==========================================
+  # CV Service
+  # ==========================================
+  cv-service:
+    build:
+      context: ./cv-service
+    container_name: tncv-cv-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-14373675}
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://keycloak:8080/realms/tncv}
+      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-admin123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+    restart: unless-stopped
+
+  # ==========================================
+  # Spring Cloud API Gateway
+  # ==========================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: tncv-api-gateway
+    ports:
+      - "8088:8088"
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+    depends_on:
+      discovery-server:
+        condition: service_started
+      user-service:
+        condition: service_started
+      cv-service:
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  minio_data:

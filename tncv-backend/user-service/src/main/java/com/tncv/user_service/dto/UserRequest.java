@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request DTO for updating user profile.
+ * Note: profile image is managed separately via PUT /api/users/me/profile-image
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,8 +23,6 @@ public class UserRequest {
     private String lastName;
 
     private String phone;
-
-    private String profileImage;
 
     private String profession;
 }

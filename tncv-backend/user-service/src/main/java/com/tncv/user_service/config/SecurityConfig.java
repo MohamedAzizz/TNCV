@@ -2,6 +2,7 @@ package com.tncv.user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -10,8 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
 
@@ -32,30 +32,50 @@ public class SecurityConfig {
                         // REGISTER
                         // -----------------------------------------
 
-                        .requestMatchers(
-                                "/api/auth/register"
-                        ).permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
 
 
                         // -----------------------------------------
                         // LOGIN
                         // -----------------------------------------
 
-                        .requestMatchers(
-                                "/api/auth/login"
-                        ).permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
 
 
                         // -----------------------------------------
-                        // CURRENT USER
+                        // ACTUATOR
+                        // -----------------------------------------
+
+                        .requestMatchers("/actuator/health").permitAll()
+
+
+                        // -----------------------------------------
+                        // CURRENT USER (profile + image)
                         // -----------------------------------------
 
                         .requestMatchers(
-                                "/api/users/me"
-                        ).hasAnyRole(
-                                "USER",
-                                "ADMIN"
-                        )
+                                HttpMethod.GET, "/api/users/me"
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT, "/api/users/me"
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT, "/api/users/me/profile-image"
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST, "/api/users/me/profile-image"
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.GET, "/api/users/me/profile-image"
+                        ).hasAnyRole("USER", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE, "/api/users/me/profile-image"
+                        ).hasAnyRole("USER", "ADMIN")
 
 
                         // -----------------------------------------
@@ -72,8 +92,7 @@ public class SecurityConfig {
                         // OTHER
                         // -----------------------------------------
 
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
 
 

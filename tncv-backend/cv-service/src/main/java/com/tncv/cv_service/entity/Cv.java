@@ -35,6 +35,36 @@ public class Cv {
     private String summary;
 
     // ============================================================
+    // FILE METADATA (MinIO reference — no binary content in DB)
+    // ============================================================
+
+    /**
+     * Original name of the uploaded file (e.g. "mon-cv.pdf")
+     */
+    private String originalFileName;
+
+    /**
+     * Stored unique file name in MinIO (e.g. "{uuid}.pdf")
+     */
+    private String storedFileName;
+
+    /**
+     * Object name/path inside MinIO bucket
+     * (e.g. "users/{userId}/cvs/{cvId}/{uuid}.pdf")
+     */
+    private String fileObjectName;
+
+    /**
+     * MIME type of the stored file (e.g. "application/pdf")
+     */
+    private String fileType;
+
+    /**
+     * File size in bytes
+     */
+    private Long fileSize;
+
+    // ============================================================
     // RELATIONS
     // ============================================================
 
@@ -148,6 +178,46 @@ public class Cv {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
+    }
+
+    public void setOriginalFileName(String originalFileName) {
+        this.originalFileName = originalFileName;
+    }
+
+    public String getStoredFileName() {
+        return storedFileName;
+    }
+
+    public void setStoredFileName(String storedFileName) {
+        this.storedFileName = storedFileName;
+    }
+
+    public String getFileObjectName() {
+        return fileObjectName;
+    }
+
+    public void setFileObjectName(String fileObjectName) {
+        this.fileObjectName = fileObjectName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
     }
 
     public List<Experience> getExperiences() {

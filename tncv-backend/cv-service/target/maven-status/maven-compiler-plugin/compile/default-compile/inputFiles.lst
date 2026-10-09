@@ -1,4 +1,5 @@
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\config\KeycloakJwtAuthenticationConverter.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\config\MinioConfig.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\config\SecurityConfig.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\controller\CertificationController.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\controller\CvController.java
@@ -11,6 +12,8 @@ C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\j
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\CvServiceApplication.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CertificationRequest.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CertificationResponse.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CvDownload.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CvFileResponse.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CvRequest.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\CvResponse.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\dto\EducationRequest.java
@@ -35,8 +38,12 @@ C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\j
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\entity\Skill.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\BadRequestException.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\ErrorResponse.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\FileTooLargeException.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\GlobalExceptionHandler.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\InvalidFileTypeException.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\ResourceNotFoundException.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\StorageException.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\exception\UnauthorizedFileAccessException.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\repository\CertificationRepository.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\repository\CvRepository.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\repository\EducationRepository.java
@@ -51,5 +58,6 @@ C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\j
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\ExperienceService.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\InterestService.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\LanguageService.java
+C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\MinioService.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\ProjectService.java
 C:\Users\user\Desktop\projet creation cv\TNCV\tncv-backend\cv-service\src\main\java\com\tncv\cv_service\service\SkillService.java
